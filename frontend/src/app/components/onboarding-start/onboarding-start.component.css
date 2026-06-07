@@ -1,0 +1,15 @@
+:host { display: block; min-height: 100vh; background: #07111e; color: #e7edf8; font-family: "IBM Plex Sans", Inter, sans-serif; }
+.onboarding { min-height: 100vh; display: grid; align-content: center; justify-items: center; gap: 24px; text-align: center; background-image: linear-gradient(rgba(48,64,82,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(48,64,82,.2) 1px, transparent 1px); background-size: 32px 32px; padding: 24px; }
+.progress { display: flex; align-items: center; gap: 10px; color: #d5dde8; font-weight: 800; letter-spacing: .06em; }
+.progress span, .progress i { display: block; width: 60px; height: 8px; border-radius: 999px; background: #283346; }
+.progress span { background: #4cd7f6; }
+h1 { margin: 32px 0 0; font-size: clamp(34px, 4vw, 46px); }
+p { margin: 0; color: #cdd6e2; font-size: 19px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(220px, 340px)); gap: 30px; margin: 40px 0 28px; }
+article { min-height: 268px; border: 1px solid #3b4859; background: #141f2d; padding: 42px 32px; display: grid; justify-items: center; align-content: center; gap: 16px; }
+article span { display: grid; width: 62px; height: 62px; place-items: center; border: 1px solid #48576b; color: #4cd7f6; font-size: 30px; }
+article h2 { margin: 0; font-size: 25px; max-width: 240px; }
+article p { font-size: 16px; max-width: 260px; }
+.primary-btn { display: inline-flex; min-width: 200px; justify-content: center; background: #4cd7f6; color: #00131b; text-decoration: none; font-weight: 800; padding: 16px 28px; border-radius: 4px; }
+.skip { color: #d8e0ea; text-decoration: none; margin-top: 8px; }
+@media (max-width: 900px) { .cards { grid-template-columns: 1fr; } }

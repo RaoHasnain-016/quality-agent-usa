@@ -1,0 +1,27 @@
+conversation_id,full_conversation
+conv_001,"Customer: Hi, I ordered something 6 days ago and it still hasn't arrived. Order #12345.
+Agent: Hello! I'm sorry to hear that. Let me check on your order. After looking at your order, I can see it's been delayed due to high demand. It should arrive within 2-3 more days.
+Customer: That's unacceptable. Can I get a refund?
+Agent: I understand your frustration. Unfortunately, refunds are only processed after the item is returned. You'll need to wait for it to arrive first, then request a return.
+Customer: This is terrible service. I want to speak to a manager.
+Agent: I understand. You can email us at support@company.com and a manager will respond within 48 hours."
+conv_002,"Customer: Does your software support Slack integration?
+Agent: Yes! We have a native Slack integration that lets you receive alerts and updates directly in your Slack channels. You can set it up in Settings > Integrations > Slack. It takes about 2 minutes to connect.
+Customer: Great, does it support multiple workspaces?
+Agent: Absolutely! You can connect up to 3 Slack workspaces on the Pro plan, and unlimited workspaces on the Enterprise plan. Would you like me to walk you through the setup?
+Customer: No, I got it. Thanks!
+Agent: Perfect! Let me know if you need anything else. Have a great day!"
+conv_003,"Customer: I was charged twice for my subscription this month.
+Agent: I'm really sorry about that double charge! That's definitely not right. Let me look into this for you right away. I can see two charges of $49 on your account from this month. I'm going to issue a full refund for the duplicate charge immediately. You'll see it back in your account within 3-5 business days. I'm also adding a $10 credit to your account for the inconvenience.
+Customer: Thank you so much! That's very helpful.
+Agent: Of course! Is there anything else I can help you with today?"
+conv_004,"Customer: How do I cancel my account?
+Agent: To cancel, go to Settings > Billing > Cancel Subscription. Note that you'll lose access immediately and we don't offer refunds for unused time.
+Customer: Wait, I thought there was a 30-day money back guarantee?
+Agent: No, we don't have that. Once you cancel, your access ends.
+Customer: Your website says there's a 30-day guarantee on the pricing page!
+Agent: I'm not sure about that. You can check our terms of service at our website."
+conv_005,"Customer: I forgot my password and can't log in.
+Agent: No problem! Click 'Forgot Password' on the login page and enter your email address. You'll receive a reset link within 2 minutes. Check your spam folder if you don't see it. The link expires after 24 hours, so make sure to use it soon!
+Customer: Got it, just received the email. Thanks!
+Agent: Great! You're all set. Let me know if you have any other questions."

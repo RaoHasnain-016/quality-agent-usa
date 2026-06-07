@@ -1,0 +1,34 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
+      <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
+      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
+      <a routerLink="/onboarding/threshold">⚙ Settings</a>
+      <a href="#">▣ Usage & Billing</a>
+    </nav>
+    <a class="help" href="#">? Help</a>
+  </aside>
+
+  <main class="stage">
+    <div class="topline">♧ <span class="avatar">♙</span></div>
+    <section class="eval-card">
+      <div class="spinner">↻</div>
+      <h1>Evaluating your conversations...</h1>
+      <p>Batch: <b>November Support Logs</b></p>
+      <div class="progress-meta"><span>156 / 340 conversations evaluated</span><b>46% complete</b></div>
+      <div class="progress"><span></span></div>
+      <p class="eta">◴ ~4 minutes remaining</p>
+      <div class="results">
+        <div *ngFor="let row of rows" [class.dim]="row[1] === 'Fail'">
+          <span>{{ row[0] }}</span>
+          <b [class]="row[1].toLowerCase()">{{ row[1] }}</b>
+          <span>{{ row[2] }}</span>
+        </div>
+      </div>
+      <p>You will receive an email when complete</p>
+      <a routerLink="/batches/oct-support-logs">Close and check back later</a>
+    </section>
+  </main>
+</div>

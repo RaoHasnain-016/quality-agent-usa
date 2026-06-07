@@ -1,0 +1,50 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
+      <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
+      <a routerLink="/conversations/conv_047">▱ Conversations</a>
+      <a routerLink="/onboarding/threshold">⚙ Settings</a>
+      <a href="#">▣ Usage & Billing</a>
+    </nav>
+    <a class="help" href="#">? Help</a>
+  </aside>
+
+  <main class="content">
+    <header class="detail-head">
+      <div>
+        <p class="crumb">Dashboard › Batches › {{ isHealthy ? 'Nov Chat Batch' : 'Oct Support Logs' }}</p>
+        <h1>{{ isHealthy ? 'Nov Chat Batch' : 'Oct Support Logs' }} <span *ngIf="!isHealthy">Needs Attention</span></h1>
+      </div>
+      <div class="actions"><button>⇩ Export {{ isHealthy ? 'CSV' : 'Report' }}</button><button class="primary">↻ Re-run Analysis</button></div>
+    </header>
+
+    <ng-container *ngIf="!isHealthy; else healthy">
+      <section class="alert">⚠ <div><b>Quality alert sent to admin&#64;company.com on Nov 24</b><p>This batch breached the minimum quality threshold of 75/100.</p></div></section>
+      <section class="summary-grid">
+        <article class="score-card"><h2>Overall Quality Score</h2><div class="ring bad">61<small>/100</small></div><b>Poor - Action Required</b></article>
+        <article class="volume"><h2>Batch Volume</h2><strong>500</strong><span>Total</span><p>◎ Passed <b>313</b></p><p>△ Warnings <b>42</b></p><p>⊗ Failed <b>145</b></p></article>
+        <article><h2>Most Common Issues Found <a>View All</a></h2><div class="issue">Wrong refund policy cited<br><small>78 conversations affected</small></div><div class="issue">No escalation when customer frustrated<br><small>52 conversations affected</small></div><div class="issue muted">Incorrect product pricing mentioned<br><small>31 conversations affected</small></div></article>
+      </section>
+      <section class="breakdown"><h2>Score Breakdown by Category</h2><div class="bars"><span>Accuracy <b>82</b><i style="--w:82%"></i></span><span class="bad">Policy △ <b>54</b><i style="--w:54%"></i></span><span>Resolution <b>68</b><i style="--w:68%"></i></span><span>Tone <b>79</b><i style="--w:79%"></i></span><span class="bad">Escalation △ <b>48</b><i style="--w:48%"></i></span></div></section>
+      <section class="logs">
+        <div class="tabs"><b>All (500)</b><b class="active">Flagged (145)</b><b>Reviewed (12)</b><label>⌕ <input placeholder="Search logs..." /></label></div>
+        <table><thead><tr><th>ID & Date</th><th>Primary Issue</th><th>Agent</th><th>Score</th><th>Action</th></tr></thead><tbody><tr *ngFor="let row of failedRows" (click)="openConversation()"><td><b>{{ row[0] }}</b><br>{{ row[1] }}</td><td><span class="tag">{{ row[5] }}</span> {{ row[2] }}</td><td>{{ row[3] }}</td><td class="bad-text">{{ row[4] }}</td><td>›</td></tr></tbody></table>
+        <a class="load-more">Load More Failed Logs</a>
+      </section>
+    </ng-container>
+
+    <ng-template #healthy>
+      <section class="healthy-grid">
+        <article class="hero-card"><div><h1>Nov Chat<br>Batch</h1><p>▣ Nov 20, 2024 &nbsp;&nbsp; ▱ 89 conversations</p></div><div class="ring good">91<small>/100</small><b>Excellent Quality</b></div><div class="mini-stats"><p>◎ Passed <b>85</b></p><p>△ Warnings <b>3</b></p><p>⊗ Failed <b>1</b></p></div></article>
+        <article><h2>Dimension Scores</h2><p *ngFor="let item of ['Accuracy 88','Policy Adherence 92','Resolution 85','Tone & Empathy 95','Escalation Logic 82']">{{ item }}<i></i></p></article>
+      </section>
+      <section class="logs">
+        <div class="tabs"><b class="active">All (89)</b><b>Flagged (1)</b><b>Reviewed (0)</b><label>⌕ <input placeholder="Search conversations..." /></label></div>
+        <table><thead><tr><th>ID</th><th>Preview</th><th>Score</th><th>Top Issue</th><th>Status</th></tr></thead><tbody><tr *ngFor="let row of healthyRows" (click)="openConversation()"><td>{{ row[0] }}</td><td>{{ row[1] }}</td><td [class.bad-text]="+row[2] < 60">{{ row[2] }}</td><td><span class="soft-tag">{{ row[3] }}</span></td><td>{{ row[4] }}</td></tr></tbody></table>
+        <footer>Showing 1 to 4 of 89 results <span>‹ ›</span></footer>
+      </section>
+    </ng-template>
+  </main>
+</div>

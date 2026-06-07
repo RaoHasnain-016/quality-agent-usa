@@ -1,0 +1,22 @@
+<main class="threshold">
+  <header><a routerLink="/dashboard">▥ AgentQA</a><span>Onboarding</span></header>
+  <section class="intro">
+    <b>STEP 3 OF 3</b>
+    <h1>Set your quality threshold</h1>
+    <p>Configure when you want to be notified about potential regressions in your batch runs.</p>
+  </section>
+  <section class="panel">
+    <div class="row"><span>Alert me when batch average drops below</span><strong>{{ threshold }}<small>/100</small></strong></div>
+    <input type="range" [(ngModel)]="threshold" min="0" max="100" />
+    <div class="range"><span>0</span><span>50</span><span>100</span></div>
+    <h2>Presets</h2>
+    <div class="presets">
+      <button (click)="threshold = 85">Strict<br><b>85</b></button>
+      <button class="active" (click)="threshold = 70">Standard<br><b>70</b></button>
+      <button (click)="threshold = 55">Lenient<br><b>55</b></button>
+    </div>
+    <div class="alert-row"><span><b>Send email alerts</b><small>Receive notifications instantly</small></span><label class="switch"><input type="checkbox" checked /><i></i></label></div>
+    <label>Alert Email<input value="admin@agentqa.com" /></label>
+  </section>
+  <footer><a routerLink="/onboarding/company">← Back</a><a class="primary-btn" routerLink="/dashboard">Complete Setup →</a></footer>
+</main>

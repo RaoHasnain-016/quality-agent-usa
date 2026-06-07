@@ -1,0 +1,66 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
+      <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
+      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
+      <a routerLink="/onboarding/threshold" routerLinkActive="active">⚙ Settings</a>
+      <a href="#">▣ Usage & Billing</a>
+    </nav>
+    <a class="help" href="#">? Help</a>
+  </aside>
+
+  <section class="workbench">
+    <header class="topbar">
+      <label class="global-search">⌕ <input placeholder="Search..." /></label>
+      <div class="top-icons">♧ <span class="avatar">♙</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-title">
+        <h1>Evaluation Batches</h1>
+        <a class="primary-btn" routerLink="/batches/new">+ New Batch</a>
+      </div>
+
+      <div class="filter-row">
+        <label class="search-line">⌕ <input placeholder="Search batches..." /></label>
+        <button>Status: All</button>
+        <button>▣ Date Range</button>
+        <button>Sort: Newest first</button>
+      </div>
+
+      <div class="data-panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Batch Name</th>
+              <th>Created</th>
+              <th>Conversations</th>
+              <th>Avg Score</th>
+              <th>Flagged</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let batch of batches" (click)="openBatch(batch)">
+              <td class="strong">{{ batch.name }}</td>
+              <td>{{ batch.created }}</td>
+              <td>{{ batch.conversations | number }}</td>
+              <td><span class="score-pill" [class]="batch.tone">{{ batch.avgScore }}%</span></td>
+              <td>{{ batch.flagged }}</td>
+              <td><span class="status-dot" [class]="batch.tone"></span>{{ batch.status }}</td>
+              <td class="actions">⋮</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="table-foot">
+        <span>Showing 1-5 of 24 batches</span>
+        <span class="pager">‹ <b>1</b> 2 3 ... ›</span>
+      </footer>
+    </main>
+  </section>
+</div>

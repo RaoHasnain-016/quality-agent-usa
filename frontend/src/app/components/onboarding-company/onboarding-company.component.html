@@ -1,0 +1,12 @@
+<main class="setup">
+  <header><a routerLink="/dashboard">▣ AgentQA</a><span>STEP 2 OF 3</span><div class="bar"><b></b></div></header>
+  <section class="panel">
+    <h1>Tell us about your company</h1>
+    <p>Customize your workspace to match your evaluation needs.</p>
+    <label>Company Name<input [(ngModel)]="company" /></label>
+    <label>What AI agent are you evaluating?<select><option>Select an AI model...</option><option>Support Agent</option><option>Sales Agent</option></select></label>
+    <label>Company Support Policy (Optional)<textarea placeholder="Briefly describe how your agents should interact with users, tone guidelines, or specific rules they must follow..."></textarea></label>
+    <p class="hint">ⓘ This helps our AI judge your conversations accurately against your specific standards.</p>
+    <footer><a class="secondary-btn" routerLink="/onboarding">Back</a><a class="primary-btn" routerLink="/onboarding/threshold">Continue →</a></footer>
+  </section>
+</main>

@@ -1,0 +1,31 @@
+:host { display: block; min-height: 100vh; background: #07111e; color: #e7edf8; font-family: "IBM Plex Sans", Inter, sans-serif; }
+.app-shell { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+.sidebar { display: flex; flex-direction: column; border-right: 1px solid #334050; background: #06111d; padding: 28px 18px; }
+.brand { display: flex; gap: 14px; align-items: center; color: #4cd7f6; text-decoration: none; margin-bottom: 44px; }
+.brand-icon { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid #158aa2; border-radius: 4px; }
+.brand b { display: block; font-size: 24px; }
+.brand small { display: block; color: #d2d9e4; margin-top: 4px; }
+nav { display: grid; gap: 8px; }
+nav a, .help { color: #dce4ef; text-decoration: none; font-weight: 700; padding: 16px 18px; border-left: 3px solid transparent; border-radius: 4px; }
+nav a.active, nav a:hover { color: #4cd7f6; background: #06283a; border-left-color: #4cd7f6; }
+.help { margin-top: auto; }
+.stage { min-height: 100vh; display: grid; grid-template-rows: 80px 1fr; }
+.topline { display: flex; justify-content: flex-end; align-items: center; gap: 22px; border-bottom: 1px solid #334050; padding: 0 28px; color: #4cd7f6; font-size: 24px; }
+.avatar { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid #425065; border-radius: 12px; background: #152233; color: #e7edf8; }
+.eval-card { width: min(840px, calc(100vw - 360px)); margin: auto; border: 1px solid #405063; border-radius: 8px; background: #172231; padding: 42px 36px; text-align: center; }
+.spinner { color: #4cd7f6; font-size: 42px; animation: spin 1.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+h1 { margin: 22px 0 12px; font-size: 30px; }
+.progress-meta { display: flex; justify-content: space-between; margin-top: 38px; font-weight: 800; }
+.progress-meta b, a { color: #4cd7f6; text-decoration: none; }
+.progress { height: 10px; border: 1px solid #526071; border-radius: 999px; margin: 22px 0; overflow: hidden; }
+.progress span { display: block; width: 46%; height: 100%; background: #65def5; }
+.eta { color: #c8d3df; }
+.results { border-top: 1px solid #405063; margin: 28px 0; padding-top: 24px; display: grid; gap: 12px; text-align: left; }
+.results div { display: grid; grid-template-columns: 130px 90px 1fr; gap: 16px; align-items: center; border: 1px solid #2d3a4d; border-radius: 5px; padding: 14px 18px; background: #121d2b; }
+.results .dim { opacity: .25; }
+.pass, .flagged, .fail { border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+.pass { color: #4cff9b; background: rgba(76, 255, 155, .12); }
+.flagged { color: #ffe24f; background: rgba(255, 226, 79, .12); }
+.fail { color: #ffaaa1; background: rgba(255, 170, 161, .12); }
+@media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } .eval-card { width: calc(100vw - 32px); } }

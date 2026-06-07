@@ -1,0 +1,197 @@
+<div class="dashboard-shell">
+  <aside class="side-nav">
+    <a class="brand" routerLink="/dashboard" aria-label="AgentQA dashboard">
+      <span class="brand-mark">▣</span>
+      <span>
+        <strong>AgentQA</strong>
+        <small>AI Monitoring</small>
+      </span>
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">▦</span>
+        Dashboard
+      </a>
+      <a routerLink="/batches" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">▤</span>
+        Batches
+      </a>
+      <a routerLink="/conversations/overview" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">▱</span>
+        Conversations
+      </a>
+    </nav>
+
+    <nav class="utility-nav" aria-label="Utilities">
+      <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">⚙</span>
+        Settings
+      </a>
+      <a class="nav-item" href="#" aria-disabled="true">
+        <span class="nav-icon">▣</span>
+        Usage &amp; Billing
+      </a>
+      <a class="nav-item" href="#" aria-disabled="true">
+        <span class="nav-icon">?</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <section class="main-panel">
+    <header class="top-bar">
+      <label class="search-field">
+        <span>⌕</span>
+        <input type="search" placeholder="Search evaluations, batches, conversations..." />
+      </label>
+
+      <div class="top-actions">
+        <button type="button" class="icon-button" aria-label="Notifications">
+          ♧
+          <span class="notification-dot"></span>
+        </button>
+        <div class="avatar" aria-label="User profile">AQ</div>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <div class="dashboard-inner">
+        <h1>Dashboard</h1>
+
+        <section class="kpi-grid" aria-label="Dashboard metrics">
+          <article class="metric-card">
+            <div class="metric-header">
+              <span>Total Evaluations</span>
+              <span class="metric-icon">▣</span>
+            </div>
+            <div class="metric-body">
+              <strong>{{ totalEvaluations | number }}</strong>
+              <span class="trend-pill">↑ {{ growthRate | number: '1.1-1' }}%</span>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-header">
+              <span>Average Quality Score</span>
+              <span class="metric-icon donut-icon"></span>
+            </div>
+            <div class="score-metric">
+              <div class="score-ring" [style.--score]="averageScore">
+                <span>{{ averageScore }}</span>
+              </div>
+              <strong>{{ averageScore }}<small>/100</small></strong>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-header">
+              <span>Flagged Conversations</span>
+              <span class="metric-icon danger">△</span>
+            </div>
+            <div class="metric-body">
+              <strong class="danger-text">{{ flaggedConversations | number }}</strong>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-header">
+              <span>Batches This Month</span>
+              <span class="metric-icon">▦</span>
+            </div>
+            <div class="metric-body">
+              <strong>{{ batchesThisMonth | number }}</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="charts-grid">
+          <article class="panel trend-panel">
+            <h2>Score Trend — Last 30 Days</h2>
+            <div class="trend-chart">
+              <svg viewBox="0 0 640 260" preserveAspectRatio="none" role="img" aria-label="Score trend line chart">
+                <defs>
+                  <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#16c6e5" stop-opacity="0.22"></stop>
+                    <stop offset="100%" stop-color="#16c6e5" stop-opacity="0.04"></stop>
+                  </linearGradient>
+                </defs>
+                <line class="grid-line" x1="28" x2="628" y1="44" y2="44"></line>
+                <line class="grid-line" x1="28" x2="628" y1="112" y2="112"></line>
+                <line class="grid-line" x1="28" x2="628" y1="180" y2="180"></line>
+                <line class="grid-line" x1="28" x2="628" y1="248" y2="248"></line>
+                <text class="axis-label" x="0" y="52">100</text>
+                <text class="axis-label" x="8" y="120">75</text>
+                <text class="axis-label" x="8" y="188">50</text>
+                <path class="trend-area" d="M 28 210 C 88 130, 132 142, 176 152 C 240 166, 286 102, 344 70 C 404 38, 458 88, 514 92 C 574 98, 608 78, 628 48 L 628 248 L 28 248 Z"></path>
+                <path class="trend-line" d="M 28 210 C 88 130, 132 142, 176 152 C 240 166, 286 102, 344 70 C 404 38, 458 88, 514 92 C 574 98, 608 78, 628 48"></path>
+              </svg>
+              <div class="chart-dates">
+                <span>Oct 1</span>
+                <span>Oct 15</span>
+                <span>Oct 30</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Score by Dimension</h2>
+            <div class="dimension-list">
+              <div class="dimension-row" *ngFor="let dimension of dimensions">
+                <span>{{ dimension.label }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill" [class]="dimension.tone" [style.width.%]="dimension.value"></div>
+                </div>
+                <strong>{{ dimension.value }}</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel batches-panel">
+          <div class="table-title">
+            <h2>Recent Batches</h2>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Batch Name</th>
+                  <th>Date</th>
+                  <th>Conversations</th>
+                  <th>Avg Score</th>
+                  <th>Flagged</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let batch of displayBatches">
+                  <td class="batch-name">{{ batch.name }}</td>
+                  <td class="mono">{{ batch.createdAt | date: 'yyyy-MM-dd' }}</td>
+                  <td class="mono">{{ batch.conversationCount | number }}</td>
+                  <td class="mono" [class]="getScoreClass(batch.avgScore)">
+                    {{ batch.avgScore ? (batch.avgScore | number: '1.1-1') : '--' }}
+                  </td>
+                  <td class="mono" [class.danger-cell]="batch.flaggedCount >= 50">
+                    {{ batch.flaggedCount === null ? '--' : batch.flaggedCount }}
+                  </td>
+                  <td>
+                    <span class="status-badge" [class]="'status-' + batch.status">
+                      <span></span>
+                      {{ batch.status | titlecase }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <a routerLink="/batches">View All Batches <span>→</span></a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </section>
+</div>

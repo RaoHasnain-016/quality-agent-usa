@@ -1,0 +1,30 @@
+{
+  "name": "agentqa-backend",
+  "version": "1.0.0",
+  "description": "AgentQA - AI Customer Support Quality Assurance Platform",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "check": "node --check src/app.js && node --check src/config/db.js && node --check src/config/firebase.js",
+    "test": "npm run check"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "firebase-admin": "^13.4.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.14.1",
+    "multer": "^2.0.1",
+    "papaparse": "^5.5.2",
+    "resend": "^4.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

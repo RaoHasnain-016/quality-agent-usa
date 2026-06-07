@@ -1,0 +1,26 @@
+<main class="login-page">
+  <section class="login-card">
+    <div class="brand-panel">
+      <a class="logo" routerLink="/dashboard">▣ AgentQA</a>
+      <h1>Know exactly when your AI agent fails.</h1>
+      <p>Monitor, evaluate, and optimize your LLM applications with precision and speed.</p>
+      <div class="features">
+        <article><span>◎</span><div><h2>Full Coverage</h2><p>Capture every interaction and analyze performance across all your deployments.</p></div></article>
+        <article><span>ϟ</span><div><h2>Instant Alerts</h2><p>Get notified the second a critical failure or hallucination occurs in production.</p></div></article>
+        <article><span>⌁</span><div><h2>Deep Insights</h2><p>Root cause analysis with detailed token traces and latency breakdowns.</p></div></article>
+      </div>
+      <footer>Trusted by 10,000+ AI engineering teams</footer>
+    </div>
+
+    <form class="form-panel" (ngSubmit)="signIn()">
+      <h2>Welcome back</h2>
+      <p>Log in to your account to continue</p>
+      <button type="button" class="google" (click)="signInWithGoogle()">G&nbsp;&nbsp; Sign in with Google</button>
+      <div class="divider"><span></span>or<span></span></div>
+      <label>Email address<input type="email" name="email" [(ngModel)]="email" placeholder="name@company.com" /></label>
+      <label><span>Password <a href="#">Forgot password?</a></span><input type="password" name="password" [(ngModel)]="password" placeholder="••••••••" /></label>
+      <button class="primary" type="submit">Sign In</button>
+      <p class="signup">Don't have an account? <a routerLink="/onboarding">Sign up</a></p>
+    </form>
+  </section>
+</main>
