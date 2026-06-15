@@ -1,65 +1,78 @@
 <div class="app-shell">
-  <aside class="sidebar">
-    <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="sidebar legacy-sidebar">
+    <a class="brand" routerLink="/dashboard"><span class="brand-icon">AQ</span><span><b>AgentQA</b><small>Quality Intelligence</small></span></a>
     <nav>
-      <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
-      <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
-      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
-      <a routerLink="/onboarding/threshold" routerLinkActive="active">⚙ Settings</a>
-      <a href="#">▣ Usage & Billing</a>
+      <span>Monitor</span>
+      <a routerLink="/dashboard" routerLinkActive="active">D <b>Dashboard</b></a>
+      <a routerLink="/batches" routerLinkActive="active">B <b>Batches</b></a>
+      <a routerLink="/conversations" routerLinkActive="active">C <b>Conversations</b></a>
+      <a routerLink="/alerts" routerLinkActive="active">! <b>Alerts</b></a>
+      <span>Intelligence</span>
+      <a routerLink="/research" routerLinkActive="active">R <b>Research</b></a>
+      <a routerLink="/analysis" routerLinkActive="active">A <b>Analysis</b></a>
+      <a routerLink="/reports" routerLinkActive="active">P <b>Reports</b></a>
+      <span>Workspace</span>
+      <a routerLink="/settings/workspace" routerLinkActive="active">S <b>Settings</b></a>
+      <a routerLink="/usage" routerLinkActive="active">U <b>Usage</b></a>
+      <a routerLink="/pricing" routerLinkActive="active">$ <b>Plans &amp; Billing</b></a>
+      <a routerLink="/audit-log" routerLinkActive="active">L <b>Audit Log</b></a>
+      <a routerLink="/help" routerLinkActive="active">? <b>Help Center</b></a>
     </nav>
-    <a class="help" href="#">? Help</a>
+    <button class="user-card" type="button" (click)="logout()"><i>{{ initials }}</i><span><b>{{ user?.company || 'AgentQA workspace' }}</b><small>{{ planName }} plan - Log out</small></span></button>
   </aside>
 
   <section class="workbench">
     <header class="topbar">
-      <label class="global-search">⌕ <input placeholder="Search..." /></label>
-      <div class="top-icons">♧ <span class="avatar">♙</span></div>
+      <label class="global-search"><span>Search</span><input [(ngModel)]="search" placeholder="Find a batch by name..." /></label>
+      <div class="top-icons"><a routerLink="/alerts" aria-label="Open alerts">!</a><a routerLink="/settings/profile" class="avatar">{{ initials }}</a></div>
     </header>
 
     <main class="content">
-      <div class="page-title">
-        <h1>Evaluation Batches</h1>
+      <header class="page-title">
+        <div><p>Evaluation operations</p><h1>Evaluation Batches</h1><span>Create, monitor, and investigate quality evaluation runs.</span></div>
         <a class="primary-btn" routerLink="/batches/new">+ New Batch</a>
-      </div>
+      </header>
 
-      <div class="filter-row">
-        <label class="search-line">⌕ <input placeholder="Search batches..." /></label>
-        <button>Status: All</button>
-        <button>▣ Date Range</button>
-        <button>Sort: Newest first</button>
-      </div>
+      <section class="summary-grid">
+        <article><span>Total batches</span><strong>{{ total | number }}</strong><small>Across this workspace</small></article>
+        <article><span>Completed on page</span><strong>{{ completedCount }}</strong><small>Ready for investigation</small></article>
+        <article><span>Average score</span><strong>{{ averageScore }}<em>/100</em></strong><small>Current page quality</small></article>
+        <article class="risk"><span>Flagged on page</span><strong>{{ flaggedCount | number }}</strong><small>Needs QA attention</small></article>
+      </section>
 
-      <div class="data-panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Batch Name</th>
-              <th>Created</th>
-              <th>Conversations</th>
-              <th>Avg Score</th>
-              <th>Flagged</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+      <section class="filter-row">
+        <label class="search-line"><span>Search batches</span><input [(ngModel)]="search" placeholder="Batch name..." /></label>
+        <button type="button" (click)="cycleStatus()">Status: {{ status || 'All' }}</button>
+        <button type="button" [class.refreshing]="refreshing" (click)="loadBatches()">Refresh</button>
+        <button type="button" (click)="sortNewest = !sortNewest">Sort: {{ sortNewest ? 'Newest' : 'Oldest' }}</button>
+      </section>
+
+      <div class="notice" *ngIf="notice">{{ notice }}</div>
+      <div class="notice error" *ngIf="error">{{ error }} <button type="button" (click)="loadBatches()">Retry</button></div>
+
+      <section class="data-panel">
+        <div class="loading" *ngIf="loading"><i></i><span>Loading evaluation batches...</span></div>
+        <div class="empty" *ngIf="!loading && !visibleBatches.length"><b>No batches found</b><span>{{ search || status ? 'Clear filters or choose another status.' : 'Upload your first evaluation file to begin.' }}</span><a routerLink="/batches/new">Create batch</a></div>
+        <table *ngIf="!loading && visibleBatches.length">
+          <thead><tr><th>Batch Name</th><th>Created</th><th>Conversations</th><th>Avg Score</th><th>Flagged</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
-            <tr *ngFor="let batch of batches" (click)="openBatch(batch)">
-              <td class="strong">{{ batch.name }}</td>
-              <td>{{ batch.created }}</td>
+            <tr *ngFor="let batch of visibleBatches" (click)="openBatch(batch)">
+              <td class="strong"><b>{{ batch.name }}</b><small>Open evaluation report</small></td>
+              <td>{{ batch.createdAt | date:'MMM d, y, h:mm a' }}</td>
               <td>{{ batch.conversations | number }}</td>
-              <td><span class="score-pill" [class]="batch.tone">{{ batch.avgScore }}%</span></td>
-              <td>{{ batch.flagged }}</td>
-              <td><span class="status-dot" [class]="batch.tone"></span>{{ batch.status }}</td>
-              <td class="actions">⋮</td>
+              <td><span class="score-pill" [class]="batch.tone">{{ batch.avgScore || '--' }}<ng-container *ngIf="batch.avgScore">%</ng-container></span></td>
+              <td [class.flagged]="batch.flagged > 0">{{ batch.flagged | number }}</td>
+              <td><span class="status"><i class="status-dot" [class]="batch.tone"></i>{{ batch.status | titlecase }}</span></td>
+              <td class="actions"><button type="button" title="Delete batch" (click)="deleteBatch(batch, $event)">Delete</button></td>
             </tr>
           </tbody>
         </table>
-      </div>
+      </section>
 
       <footer class="table-foot">
-        <span>Showing 1-5 of 24 batches</span>
-        <span class="pager">‹ <b>1</b> 2 3 ... ›</span>
+        <span>Showing {{ visibleBatches.length }} of {{ total | number }} batches</span>
+        <div class="pager"><button type="button" [disabled]="page === 1" (click)="changePage(page - 1)">Previous</button><b>Page {{ page }} of {{ pages }}</b><button type="button" [disabled]="page === pages" (click)="changePage(page + 1)">Next</button></div>
       </footer>
     </main>
   </section>

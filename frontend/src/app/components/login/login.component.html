@@ -16,11 +16,12 @@
       <h2>Welcome back</h2>
       <p>Log in to your account to continue</p>
       <button type="button" class="google" (click)="signInWithGoogle()">G&nbsp;&nbsp; Sign in with Google</button>
+      <p class="login-error" *ngIf="error">{{ error }}</p>
       <div class="divider"><span></span>or<span></span></div>
       <label>Email address<input type="email" name="email" [(ngModel)]="email" placeholder="name@company.com" /></label>
-      <label><span>Password <a href="#">Forgot password?</a></span><input type="password" name="password" [(ngModel)]="password" placeholder="••••••••" /></label>
-      <button class="primary" type="submit">Sign In</button>
-      <p class="signup">Don't have an account? <a routerLink="/onboarding">Sign up</a></p>
+      <label><span>Password <a routerLink="/forgot-password">Forgot password?</a></span><input type="password" name="password" [(ngModel)]="password" placeholder="••••••••" /></label>
+      <button class="primary" type="submit" [disabled]="loading">{{ loading ? 'Signing in...' : 'Sign In' }}</button>
+      <p class="signup">Don't have an account? <a routerLink="/signup">Sign up manually</a></p>
     </form>
   </section>
 </main>

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { WorkspaceSidebarComponent } from '../workspace-sidebar/workspace-sidebar.component';
 
 @Component({
   selector: 'app-batch-evaluating',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, WorkspaceSidebarComponent],
   templateUrl: './batch-evaluating.component.html',
   styleUrls: ['./batch-evaluating.component.css']
 })

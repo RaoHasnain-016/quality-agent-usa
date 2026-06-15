@@ -5,8 +5,9 @@
     <p>Customize your workspace to match your evaluation needs.</p>
     <label>Company Name<input [(ngModel)]="company" /></label>
     <label>What AI agent are you evaluating?<select><option>Select an AI model...</option><option>Support Agent</option><option>Sales Agent</option></select></label>
-    <label>Company Support Policy (Optional)<textarea placeholder="Briefly describe how your agents should interact with users, tone guidelines, or specific rules they must follow..."></textarea></label>
+    <label>Company Support Policy (Optional)<textarea [(ngModel)]="policy" placeholder="Briefly describe how your agents should interact with users, tone guidelines, or specific rules they must follow..."></textarea></label>
     <p class="hint">ⓘ This helps our AI judge your conversations accurately against your specific standards.</p>
-    <footer><a class="secondary-btn" routerLink="/onboarding">Back</a><a class="primary-btn" routerLink="/onboarding/threshold">Continue →</a></footer>
+    <p class="hint" *ngIf="error">{{ error }}</p>
+    <footer><a class="secondary-btn" routerLink="/onboarding">Back</a><button class="primary-btn" [disabled]="loading" (click)="continue()">{{ loading ? 'Saving...' : 'Continue →' }}</button></footer>
   </section>
 </main>

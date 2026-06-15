@@ -6,8 +6,10 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "seed": "node src/scripts/seed.js",
     "check": "node --check src/app.js && node --check src/config/db.js && node --check src/config/firebase.js",
-    "test": "npm run check"
+    "test": "npm run check",
+    "smoke": "node src/scripts/api-smoke.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
@@ -22,7 +24,8 @@
     "mongoose": "^8.14.1",
     "multer": "^2.0.1",
     "papaparse": "^5.5.2",
-    "resend": "^4.5.1"
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

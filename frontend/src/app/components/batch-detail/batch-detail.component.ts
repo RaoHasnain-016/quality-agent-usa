@@ -1,34 +1,73 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ApiService } from '../../services/api.service';
+import { WorkspaceSidebarComponent } from '../workspace-sidebar/workspace-sidebar.component';
 
 @Component({
   selector: 'app-batch-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, WorkspaceSidebarComponent],
   templateUrl: './batch-detail.component.html',
   styleUrls: ['./batch-detail.component.css']
 })
-export class BatchDetailComponent {
-  readonly id = this.route.snapshot.paramMap.get('id') || 'oct-support-logs';
-  readonly isHealthy = this.id.includes('nov-chat');
+export class BatchDetailComponent implements OnInit {
+  readonly id = this.route.snapshot.paramMap.get('id') || '';
+  isHealthy = false;
+  batch: any = null;
+  notice = '';
+  failedRows: any[] = [];
+  healthyRows: any[] = [];
 
-  readonly failedRows = [
-    ['CONV-8821', 'Oct 24, 14:32', 'Wrong refund policy cited', 'AI_Support_V2', '32/100', 'POLICY'],
-    ['CONV-8794', 'Oct 24, 11:15', 'No escalation when customer frustr...', 'AI_Support_V2', '45/100', 'ESCALATION'],
-    ['CONV-8750', 'Oct 23, 16:40', 'Provided incorrect warranty duration', 'AI_Support_V1.5', '51/100', 'POLICY']
-  ];
+  constructor(private route: ActivatedRoute, private router: Router, private api: ApiService) {}
 
-  readonly healthyRows = [
-    ['#C-8921', '"I cannot access my billing portal since yesterday..."', '45', 'Failed Resolution', 'Pending'],
-    ['#C-8922', '"How do I upgrade my team plan to include more seats?"', '98', '-', 'Pending'],
-    ['#C-8923', '"The API rate limit is throwing 429s prematurely."', '72', 'Tone Warning', 'Pending'],
-    ['#C-8924', '"Cancel my subscription immediately."', '100', '-', 'Pending']
-  ];
+  async ngOnInit() {
+    await this.load();
+  }
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  async load() {
+    try {
+      this.notice = '';
+      this.batch = await this.api.getBatch(this.id);
+      this.isHealthy = this.batch.avgScore >= 80;
+      const result: any = await this.api.getConversations(this.id);
+      const conversations = result.conversations || [];
+      this.failedRows = conversations.filter((item: any) => item.flagged).map((item: any) => [
+        item.externalId || item._id, new Date(item.createdAt).toLocaleString(), item.issues?.[0] || 'Quality issue',
+        'AgentQA AI', `${item.overallScore}/100`, 'FLAGGED', item._id
+      ]);
+      this.healthyRows = conversations.map((item: any) => [
+        item.externalId || item._id, item.summary || 'Evaluated conversation', String(item.overallScore ?? '-'),
+        item.issues?.[0] || '-', item.reviewed ? 'Reviewed' : 'Pending', item._id
+      ]);
+    } catch (error: any) {
+      this.notice = error?.error?.error || 'Unable to load batch.';
+    }
+  }
 
-  openConversation() {
-    this.router.navigate(['/conversations/conv_047']);
+  openConversation(row: any[]) {
+    this.router.navigate(['/conversations', row[6] || row[5]]);
+  }
+
+  async exportBatch() {
+    const blob = await this.api.exportBatch(this.id) as Blob;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${this.batch?.name || 'batch'}-results.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    this.notice = 'Batch export downloaded.';
+  }
+
+  get totalCount() {
+    return this.batch?.conversationCount || this.batch?.totalConversations || 0;
+  }
+
+  get flaggedCount() {
+    return this.batch?.flaggedCount || 0;
+  }
+
+  get passedCount() {
+    return Math.max(0, this.totalCount - this.flaggedCount);
   }
 }

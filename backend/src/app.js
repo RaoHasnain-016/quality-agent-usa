@@ -21,17 +21,28 @@ const allowedOrigins = [
   'http://127.0.0.1:4300'
 ].filter(Boolean)
 
+function isAllowedOrigin (origin) {
+  if (!origin || allowedOrigins.includes(origin)) return true
+  if (process.env.NODE_ENV !== 'production') {
+    return /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
+  }
+  return false
+}
+
 app.use(helmet({
   contentSecurityPolicy: false
 }))
 
 app.use(cors({
   origin (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    if (isAllowedOrigin(origin)) return callback(null, true)
     callback(new Error(`CORS blocked origin: ${origin}`))
   },
   credentials: true
 }))
+
+const billingRoutes = require('./routes/billing.routes')
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), billingRoutes.webhook)
 
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -45,6 +56,19 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
+    database: require('mongoose').connection.readyState === 1 ? 'connected' : 'disconnected',
+    databaseName: require('mongoose').connection.name || process.env.MONGODB_DB || null,
+    aiProvider: process.env.AI_PROVIDER || 'auto',
+    integrations: {
+      gemini: Boolean(process.env.GEMINI_API_KEY),
+      resend: Boolean(process.env.RESEND_API_KEY),
+      firebase: Boolean(
+        process.env.FIREBASE_PROJECT_ID &&
+        process.env.FIREBASE_PRIVATE_KEY &&
+        process.env.FIREBASE_CLIENT_EMAIL
+      ),
+      stripe: Boolean(process.env.STRIPE_SECRET_KEY)
+    },
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
@@ -58,6 +82,14 @@ app.use('/api/batches', require('./routes/batch.routes'))
 app.use('/api/conversations', require('./routes/conversation.routes'))
 app.use('/api/dashboard', require('./routes/dashboard.routes'))
 app.use('/api/settings', require('./routes/settings.routes'))
+app.use('/api/members', require('./routes/member.routes'))
+app.use('/api/workspace', require('./routes/workspace.routes'))
+app.use('/api/ai', require('./routes/ai.routes'))
+app.use('/api/research', require('./routes/research.routes'))
+app.use('/api/analysis', require('./routes/analysis.routes'))
+app.use('/api/alerts', require('./routes/alert.routes'))
+app.use('/api/reports', require('./routes/report.routes'))
+app.use('/api/billing', billingRoutes)
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` })

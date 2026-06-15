@@ -11,12 +11,12 @@
     <div class="range"><span>0</span><span>50</span><span>100</span></div>
     <h2>Presets</h2>
     <div class="presets">
-      <button (click)="threshold = 85">Strict<br><b>85</b></button>
-      <button class="active" (click)="threshold = 70">Standard<br><b>70</b></button>
-      <button (click)="threshold = 55">Lenient<br><b>55</b></button>
+      <button [class.active]="threshold === 85" (click)="threshold = 85">Strict<br><b>85</b></button>
+      <button [class.active]="threshold === 70" (click)="threshold = 70">Standard<br><b>70</b></button>
+      <button [class.active]="threshold === 55" (click)="threshold = 55">Lenient<br><b>55</b></button>
     </div>
     <div class="alert-row"><span><b>Send email alerts</b><small>Receive notifications instantly</small></span><label class="switch"><input type="checkbox" checked /><i></i></label></div>
     <label>Alert Email<input value="admin@agentqa.com" /></label>
   </section>
-  <footer><a routerLink="/onboarding/company">← Back</a><a class="primary-btn" routerLink="/dashboard">Complete Setup →</a></footer>
+  <footer><a routerLink="/onboarding/company">← Back</a><button class="primary-btn" [disabled]="loading" (click)="complete()">{{ loading ? 'Saving...' : 'Complete Setup →' }}</button></footer>
 </main>

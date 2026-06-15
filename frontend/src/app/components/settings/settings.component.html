@@ -1,29 +1,109 @@
-<div class="page-card">
-  <h2>Settings</h2>
-  <p *ngIf="error" class="error">{{ error }}</p>
-  <p *ngIf="message" class="message">{{ message }}</p>
+<div class="settings-shell">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <main>
+    <header class="page-head">
+      <div><span>Workspace administration</span><h1>Settings</h1><p>Control identity, team access, evaluation defaults, notifications, and appearance.</p></div>
+      <div class="plan-chip"><small>Current plan</small><b>{{ memberUsage.planName }}</b><span>{{ memberUsage.used }} / {{ memberUsage.limit >= 1000000 ? 'Unlimited' : memberUsage.limit }} members</span></div>
+    </header>
 
-  <form (ngSubmit)="saveSettings()">
-    <label>
-      Company name
-      <input type="text" [(ngModel)]="form.company" name="company" />
-    </label>
+    <div class="settings-grid">
+      <nav class="settings-nav">
+        <em>Personal</em>
+        <a routerLink="/settings/profile" routerLinkActive="active">Profile <span>&#8250;</span></a>
+        <a routerLink="/settings/notifications" routerLinkActive="active">Notifications <span>&#8250;</span></a>
+        <a routerLink="/settings/appearance" routerLinkActive="active">Appearance <span>&#8250;</span></a>
+        <em>Workspace</em>
+        <a routerLink="/settings/workspace" routerLinkActive="active">General <span>&#8250;</span></a>
+        <a routerLink="/settings/members" routerLinkActive="active">Members & roles <span>&#8250;</span></a>
+        <a routerLink="/settings/integrations" routerLinkActive="active">Integrations <span>&#8250;</span></a>
+        <a routerLink="/settings/models" routerLinkActive="active">Models & judges <span>&#8250;</span></a>
+        <em>Administration</em>
+        <a routerLink="/settings/security" routerLinkActive="active">Security <span>&#8250;</span></a>
+        <a routerLink="/settings/api-keys" routerLinkActive="active">API access <span>&#8250;</span></a>
+        <a routerLink="/settings/billing" routerLinkActive="active">Plans & billing <span>&#8250;</span></a>
+      </nav>
 
-    <label>
-      Alert email
-      <input type="email" [(ngModel)]="form.alertEmail" name="alertEmail" />
-    </label>
+      <section class="content" [class.loading]="loading">
+        <div class="notice error" *ngIf="error">{{ error }}</div>
+        <div class="notice success" *ngIf="message">{{ message }}</div>
 
-    <label>
-      Alert threshold
-      <input type="number" [(ngModel)]="form.alertThreshold" name="alertThreshold" min="0" max="100" />
-    </label>
+        <ng-container *ngIf="section === 'profile'">
+          <div class="section-title"><div><span>Personal settings</span><h2>Profile</h2><p>Keep your account identity and local workspace preferences current.</p></div><button (click)="saveSettings()" [disabled]="saving">Save changes</button></div>
+          <div class="panel form-grid">
+            <label><span>Display name</span><input [(ngModel)]="form.displayName" placeholder="Your name"></label>
+            <label><span>Account email</span><input [value]="form.email" disabled></label>
+            <label><span>Timezone</span><select [(ngModel)]="form.timezone"><option>Asia/Karachi</option><option>UTC</option><option>America/New_York</option><option>Europe/London</option><option>Asia/Dubai</option></select></label>
+            <label><span>Interface theme</span><select [(ngModel)]="form.theme" (change)="selectTheme(form.theme)"><option *ngFor="let item of themes" [value]="item.id">{{ item.name }}</option></select></label>
+          </div>
+        </ng-container>
 
-    <label>
-      Company policy
-      <textarea [(ngModel)]="form.companyPolicy" name="companyPolicy" rows="5"></textarea>
-    </label>
+        <ng-container *ngIf="section === 'workspace'">
+          <div class="section-title"><div><span>Workspace settings</span><h2>General configuration</h2><p>Shared evaluation defaults apply to every new quality run.</p></div><button (click)="saveSettings()" [disabled]="saving">Save workspace</button></div>
+          <div class="panel form-grid">
+            <label class="wide"><span>Workspace name</span><input [(ngModel)]="form.company" placeholder="AgentQA workspace"></label>
+            <label><span>Data retention</span><select [(ngModel)]="form.dataRetentionDays"><option [ngValue]="30">30 days</option><option [ngValue]="90">90 days</option><option [ngValue]="365">1 year</option><option [ngValue]="1095">3 years</option></select></label>
+            <label class="toggle-line"><div><span>Require review for flagged conversations</span><small>Route every failed evaluation into the review queue.</small></div><input type="checkbox" [(ngModel)]="form.requireReviewForFlagged"></label>
+            <label class="wide"><span>Company policy / evaluation rubric</span><textarea rows="10" [(ngModel)]="form.companyPolicy" placeholder="Define mandatory policies, escalation rules, and quality standards..."></textarea></label>
+          </div>
+        </ng-container>
 
-    <button type="submit">Save settings</button>
-  </form>
+        <ng-container *ngIf="section === 'members'">
+          <div class="section-title"><div><span>Access management</span><h2>Members & roles</h2><p>Invite collaborators and keep workspace permissions intentional.</p></div><a class="upgrade" routerLink="/settings/billing">Manage plan</a></div>
+          <div class="usage-panel"><div><b>{{ memberUsage.used }} of {{ memberUsage.limit >= 1000000 ? 'unlimited' : memberUsage.limit }}</b><span>invited member seats used on {{ memberUsage.planName }}</span></div><div class="meter"><i [style.width.%]="memberUsage.limit >= 1000000 ? 5 : (memberUsage.used / memberUsage.limit) * 100"></i></div></div>
+          <form class="panel invite-form" (ngSubmit)="inviteMember()">
+            <div><span>Invite a teammate</span><small>An email notification with a secure invitation link will be sent.</small></div>
+            <input [(ngModel)]="invite.name" name="inviteName" placeholder="Full name">
+            <input [(ngModel)]="invite.email" name="inviteEmail" type="email" placeholder="name@company.com" required>
+            <select [(ngModel)]="invite.role" name="inviteRole"><option *ngFor="let role of roles" [value]="role">{{ role | titlecase }}</option></select>
+            <button type="submit" [disabled]="memberUsage.remaining === 0">Send invite</button>
+          </form>
+          <div class="panel member-table">
+            <div class="table-head"><span>Member</span><span>Role</span><span>Status</span><span>Actions</span></div>
+            <div class="member-row" *ngFor="let member of members">
+              <div class="identity"><i>{{ (member.name || member.email)[0] | uppercase }}</i><span><b>{{ member.name || member.email }}</b><small>{{ member.email }}</small></span></div>
+              <select [(ngModel)]="member.role" (change)="changeRole(member)"><option *ngFor="let role of roles" [value]="role">{{ role | titlecase }}</option></select>
+              <span class="status" [class.active]="member.status === 'active'">{{ member.status }}</span>
+              <div class="actions"><button *ngIf="member.status === 'pending'" (click)="resend(member)">Resend</button><button class="danger" (click)="remove(member)">Remove</button></div>
+            </div>
+            <div class="empty" *ngIf="!members.length">No teammates invited yet.</div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="section === 'notifications'">
+          <div class="section-title"><div><span>Alerting</span><h2>Notifications</h2><p>Decide when AgentQA should notify your quality team.</p></div><button (click)="saveSettings()">Save preferences</button></div>
+          <div class="panel form-grid">
+            <label class="wide"><span>Alert recipient</span><input type="email" [(ngModel)]="form.alertEmail" placeholder="quality@company.com"></label>
+            <label class="wide"><span>Quality alert threshold: {{ form.alertThreshold }}/100</span><input type="range" min="0" max="100" [(ngModel)]="form.alertThreshold"></label>
+            <label class="toggle-line"><div><span>Quality alert emails</span><small>Notify when a batch falls below the threshold.</small></div><input type="checkbox" [(ngModel)]="form.notificationsEnabled"></label>
+            <label class="toggle-line"><div><span>Weekly executive digest</span><small>Receive trend, failure, and capacity summaries.</small></div><input type="checkbox" [(ngModel)]="form.weeklyDigest"></label>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="section === 'appearance'">
+          <div class="section-title"><div><span>Personalization</span><h2>Appearance</h2><p>Choose a workspace theme. Changes apply immediately across AgentQA.</p></div></div>
+          <div class="theme-grid">
+            <button class="theme-card" *ngFor="let item of themes" [class.selected]="form.theme === item.id" (click)="selectTheme(item.id)">
+              <span class="swatches"><i *ngFor="let color of item.swatches" [style.background]="color"></i></span><b>{{ item.name }}</b><small>{{ item.description }}</small><em>{{ form.theme === item.id ? 'Applied' : 'Apply theme' }}</em>
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="section === 'integrations' || section === 'models'">
+          <div class="section-title"><div><span>Connected systems</span><h2>{{ section === 'models' ? 'Models & judges' : 'Integrations' }}</h2><p>Live status from the AgentQA backend environment.</p></div></div>
+          <div class="integration-grid">
+            <article *ngFor="let item of ['gemini','resend','firebase','stripe']"><div class="integration-icon">{{ item[0] | uppercase }}</div><div><b>{{ item | titlecase }}</b><small>{{ item === 'gemini' ? 'AI evaluation and research judge' : item === 'resend' ? 'Member invitations and quality alerts' : item === 'firebase' ? 'Identity and Google authentication' : 'Plans, subscriptions, and billing' }}</small></div><span [class.live]="health.integrations?.[item]">{{ health.integrations?.[item] ? 'Connected' : 'Needs setup' }}</span></article>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="section === 'security' || section === 'api-keys'">
+          <div class="section-title"><div><span>Administration</span><h2>{{ section === 'security' ? 'Security' : 'API access' }}</h2><p>{{ section === 'security' ? 'Review authentication and workspace protection.' : 'Programmatic access is protected by Firebase bearer tokens.' }}</p></div></div>
+          <div class="panel security-list">
+            <article><div><b>Firebase authentication</b><small>Google and email/password identity is verified by the backend.</small></div><span class="good">Enabled</span></article>
+            <article><div><b>Database isolation</b><small>Every API query is scoped to the authenticated workspace owner.</small></div><span class="good">Enforced</span></article>
+            <article><div><b>API credentials</b><small>Use the signed Firebase ID token as the Bearer token for API requests.</small></div><span>Managed</span></article>
+          </div>
+        </ng-container>
+      </section>
+    </div>
+  </main>
 </div>

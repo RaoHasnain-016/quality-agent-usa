@@ -1,0 +1,60 @@
+<div class="billing-shell">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <main class="pricing-page">
+    <section class="hero">
+      <p>Plans & billing</p>
+      <h1>Scale your AI quality operation.</h1>
+      <span>Every plan includes the full AgentQA platform. Plans control workspace capacity and team size.</span>
+      <div class="trust-row"><b>Secure Stripe checkout</b><b>Change plans anytime</b><b>Full platform access</b></div>
+    </section>
+
+    <div class="message success" *ngIf="notice">{{ notice }}</div>
+    <div class="message error" *ngIf="error">{{ error }}</div>
+
+    <header class="plans-heading"><div><span>Available plans</span><h2>Select the right plan for your team</h2></div><p>Choose any paid plan to continue securely to Stripe Checkout.</p></header>
+    <section class="plans">
+      <article *ngFor="let plan of plans" [class]="'plan-card ' + plan.id" [class.featured]="plan.id === 'pro'" [class.current]="plan.id === subscription?.plan?.id">
+        <div class="card-accent"></div>
+        <header><div class="plan-icon">{{ plan.name[0] }}</div><div><span>{{ plan.name }}</span><small>{{ plan.id === 'free' ? 'For evaluation' : plan.id === 'starter' ? 'For growing teams' : plan.id === 'pro' ? 'For production' : 'For organizations' }}</small></div><em *ngIf="plan.id === 'pro'">Recommended</em><em *ngIf="plan.id === subscription?.plan?.id">Current</em></header>
+        <p>{{ plan.description }}</p>
+        <div class="price"><h2><small>$</small>{{ plan.monthlyPrice }}</h2><span>USD<br>/ month</span></div>
+        <div class="capacity"><div><b>{{ plan.batchUploadLimit >= 1000000 ? 'Unlimited' : plan.batchUploadLimit }}</b><small>Monthly files</small></div><div><b>{{ plan.memberLimit >= 1000000 ? 'Unlimited' : plan.memberLimit }}</b><small>Team members</small></div></div>
+        <button (click)="choosePlan(plan)" [disabled]="busyPlan || plan.id === subscription?.plan?.id || (plan.id !== 'free' && !plan.checkoutAvailable)">{{ plan.id === subscription?.plan?.id ? 'Current plan' : busyPlan === plan.id ? 'Opening Stripe checkout...' : plan.id === 'free' ? 'Select Free plan' : !plan.checkoutAvailable ? 'Stripe price unavailable' : 'Select ' + plan.name + ' & pay' }}</button>
+        <ul><li>All AgentQA quality features</li><li>Gemini evaluation and research</li><li>{{ plan.evalLimit >= 1000000 ? 'Unlimited' : (plan.evalLimit | number) }} evaluations</li><li>Reports, exports, and audit history</li></ul>
+      </article>
+    </section>
+
+    <section class="current-plan-card" *ngIf="subscription">
+      <div class="current-plan-main">
+        <div class="current-plan-icon">{{ subscription.plan.name[0] }}</div>
+        <div><span>Active subscription</span><h2>{{ subscription.plan.name }} plan</h2><p>{{ subscription.plan.description }}</p></div>
+      </div>
+      <div class="current-price"><small>Current price</small><strong><i>$</i>{{ subscription.plan.monthlyPrice }}</strong><span>USD / month</span></div>
+      <div class="current-meta">
+        <div><small>Billing status</small><b>{{ subscription.subscriptionStatus || 'Active' }}</b></div>
+        <div><small>Usage resets</small><b>{{ subscription.usage.resetsAt | date:'mediumDate' }}</b></div>
+        <button (click)="manageBilling()" [disabled]="busyPlan === 'portal'">{{ busyPlan === 'portal' ? 'Opening portal...' : 'Manage with Stripe' }}</button>
+      </div>
+      <div class="current-usage">
+        <div><header><span>Monthly files</span><b>{{ subscription.usage.filesUsed }} / {{ subscription.usage.fileLimit >= 1000000 ? 'Unlimited' : subscription.usage.fileLimit }}</b></header><i><b [style.width.%]="percent(subscription.usage.filesUsed, subscription.usage.fileLimit)"></b></i></div>
+        <div><header><span>Evaluations</span><b>{{ subscription.usage.evaluationsUsed | number }} / {{ subscription.usage.evaluationLimit >= 1000000 ? 'Unlimited' : (subscription.usage.evaluationLimit | number) }}</b></header><i><b [style.width.%]="percent(subscription.usage.evaluationsUsed, subscription.usage.evaluationLimit)"></b></i></div>
+        <div class="included"><span>Included</span><b>{{ subscription.plan.memberLimit >= 1000000 ? 'Unlimited' : subscription.plan.memberLimit }} members</b><b>All quality features</b></div>
+      </div>
+    </section>
+
+    <section class="comparison">
+      <header><h2>Compare plans</h2><span>Features stay unlocked. Plans scale operational capacity.</span></header>
+      <div class="compare-row heading"><b>Capability</b><b>Free</b><b>Starter</b><b>Pro</b><b>Enterprise</b></div>
+      <div class="compare-row" *ngFor="let feature of features"><span>{{ feature[0] }}</span><b *ngFor="let value of feature | slice:1">{{ value === true ? 'Yes' : value === false ? '-' : value }}</b></div>
+    </section>
+
+    <section class="invoice-panel">
+      <header><div><span>Billing history</span><h2>Invoices</h2></div><button (click)="manageBilling()" [disabled]="busyPlan === 'portal'">Open secure billing portal</button></header>
+      <div class="invoice-head"><span>Invoice</span><span>Date</span><span>Status</span><span>Amount</span><span>Document</span></div>
+      <div class="invoice-row" *ngFor="let invoice of invoices"><b>{{ invoice.number || invoice.id }}</b><span>{{ invoice.created | date:'mediumDate' }}</span><em>{{ invoice.status }}</em><strong>{{ invoice.amountPaid / 100 | currency:(invoice.currency | uppercase) }}</strong><a [href]="invoice.invoicePdf || invoice.hostedInvoiceUrl" target="_blank" rel="noopener">Download</a></div>
+      <p *ngIf="!invoices.length">Invoices will appear here after the first successful Stripe payment.</p>
+    </section>
+
+    <footer><span>Secure subscription management powered by Stripe.</span><a routerLink="/help">Questions about plans?</a></footer>
+  </main>
+</div>

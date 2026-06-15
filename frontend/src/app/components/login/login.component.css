@@ -24,4 +24,5 @@ label span { display:flex; justify-content:space-between; }
 label a, .signup a { color:#4cd7f6; text-decoration:none; }
 input { height:48px; background:#0b1119; border:1px solid #263346; color:#e7edf8; padding:0 16px; font:inherit; }
 .signup { margin-top:22px !important; }
+.login-error{border:1px solid #7d3d47;background:#2a1018;color:#ffaaa1;padding:10px;text-align:left!important;font-size:11px}
 @media (max-width:900px){.login-card{grid-template-columns:1fr}.brand-panel{display:none}}

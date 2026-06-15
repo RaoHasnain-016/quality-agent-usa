@@ -76,6 +76,9 @@ router.get('/stats', async (req, res) => {
       completedBatches,
       evalUsed: req.user.evalUsed,
       evalLimit: req.user.evalLimit,
+      batchUploadsUsed: req.user.batchUploadsUsed,
+      batchUploadLimit: req.user.batchUploadLimit,
+      plan: req.user.plan,
       trendData,
       issueBreakdown: {
         accuracy: Math.round(dimensions.accuracy || 0),

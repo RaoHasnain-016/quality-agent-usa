@@ -1,14 +1,15 @@
 <div class="app-shell">
-  <aside class="sidebar">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="sidebar legacy-sidebar">
     <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
     <nav>
       <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
       <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
-      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
-      <a routerLink="/onboarding/threshold" routerLinkActive="active">⚙ Settings</a>
-      <a href="#">▣ Usage & Billing</a>
+      <a routerLink="/conversations" routerLinkActive="active">▱ Conversations</a>
+      <a routerLink="/settings/workspace" routerLinkActive="active">⚙ Settings</a>
+      <a routerLink="/pricing">▣ Usage & Billing</a>
     </nav>
-    <a class="help" href="#">? Help</a>
+    <a class="help" routerLink="/help">? Help</a>
   </aside>
 
   <section class="workbench">
@@ -26,17 +27,20 @@
 
       <section class="upload-card">
         <label>Batch Name<input [(ngModel)]="batchName" placeholder="e.g., Q3 Customer Support Eval" /></label>
-        <div class="dropzone">
+        <label class="dropzone">
+          <input type="file" accept=".csv,.json" hidden (change)="selectFile($event)" />
           <div class="upload-icon">☁</div>
-          <h2>Drop your CSV or JSON file here</h2>
-          <a>or click to browse</a>
+          <h2>{{ file ? file.name : 'Drop your CSV or JSON file here' }}</h2>
+          <a>{{ file ? 'File selected - click to replace' : 'or click to browse' }}</a>
           <p>Supports CSV and JSON · Max 10MB · Up to 10,000 conversations</p>
-        </div>
-        <button class="accordion">ⓘ Supported formats <span>⌄</span></button>
+        </label>
+        <button class="accordion" (click)="formatsOpen = !formatsOpen">ⓘ Supported formats <span>⌄</span></button>
+        <p *ngIf="formatsOpen">CSV requires a conversation or transcript column. JSON may contain an array of conversation objects.</p>
+        <p *ngIf="error">{{ error }}</p>
       </section>
 
       <footer class="flow-actions">
-        <a>⌄ Download sample CSV</a>
+        <a (click)="downloadSample()">⌄ Download sample CSV</a>
         <button class="secondary-btn" (click)="continue()">Continue →</button>
       </footer>
     </main>
@@ -49,14 +53,14 @@
 
       <section class="file-card">
         <div class="file-icon">▤</div>
-        <div><h2>november_support_logs.csv <small>2.4 MB</small></h2><p>✓ 340 conversations detected and parsed successfully.</p></div>
-        <button>Remove file</button>
+        <div><h2>{{ file?.name }} <small>{{ ((file?.size || 0) / 1024).toFixed(1) }} KB</small></h2><p>Ready for secure upload and Gemini evaluation.</p></div>
+        <button (click)="removeFile()">Remove file</button>
       </section>
 
       <h2 class="section-title">Configure Evaluation</h2>
       <div class="config-grid">
         <label class="rubric">Company Policy / Evaluation Rubric
-          <textarea># Core Directives&#10;1. Agent must always verify account ownership before discussing billing.&#10;2. Tone should be empathetic but concise.&#10;3. Never promise refunds without escalation.</textarea>
+          <textarea [(ngModel)]="rubric"># Core Directives&#10;1. Agent must always verify account ownership before discussing billing.&#10;2. Tone should be empathetic but concise.&#10;3. Never promise refunds without escalation.</textarea>
         </label>
         <aside class="threshold-card">
           <div class="threshold-head"><b>Alert Threshold</b><span>{{ threshold }}</span></div>
@@ -70,7 +74,7 @@
 
       <footer class="bottom-bar">
         <span>◌ Usage: 450 / 1,000 evaluations this month</span>
-        <div><button class="secondary-btn" routerLink="/batches/new">Back</button><button class="primary-btn" (click)="startEvaluation()">Start Evaluation →</button></div>
+        <div><button class="secondary-btn" (click)="step = 'upload'">Back</button><button class="primary-btn" [disabled]="loading" (click)="startEvaluation()">{{ loading ? 'Uploading...' : 'Start Evaluation →' }}</button></div>
       </footer>
     </main>
   </section>

@@ -1,0 +1,44 @@
+<div class="admin-shell">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <main>
+    <header class="page-head">
+      <div><span>Workspace operations</span><h1>{{ view === 'usage' ? 'Usage & capacity' : view === 'audit' ? 'Audit log' : 'Help center' }}</h1><p>{{ view === 'usage' ? 'Monitor monthly limits and operational volume from live workspace data.' : view === 'audit' ? 'Review security-sensitive account and workspace activity.' : 'Find product guidance or create a tracked support request.' }}</p></div>
+      <a *ngIf="view === 'usage'" class="primary" routerLink="/pricing">Upgrade capacity</a>
+      <button *ngIf="view === 'audit'" class="primary" (click)="exportAudit()">Export audit CSV</button>
+      <a *ngIf="view === 'help'" class="primary" href="mailto:hasnain.devconnect@gmail.com">Email support</a>
+    </header>
+
+    <div class="notice error" *ngIf="error">{{ error }}</div>
+    <div class="notice success" *ngIf="notice">{{ notice }}</div>
+    <div class="loading" *ngIf="loading"><i></i></div>
+
+    <ng-container *ngIf="view === 'usage' && !loading">
+      <section class="plan-banner"><div><span>Current plan</span><h2>{{ usage.plan.name }}</h2><p>Usage resets {{ usage.resetsAt | date:'mediumDate' }}</p></div><a routerLink="/settings/billing">Manage subscription</a></section>
+      <section class="quota-grid">
+        <article *ngFor="let item of [['Files uploaded', usage.quotas.files], ['Evaluations', usage.quotas.evaluations], ['Member seats', usage.quotas.members]]">
+          <header><span>{{ item[0] }}</span><b>{{ item[1].used | number }} / {{ item[1].limit >= 1000000 ? 'Unlimited' : (item[1].limit | number) }}</b></header>
+          <div class="meter"><i [style.width.%]="percent(item[1])"></i></div><small>{{ percent(item[1]) }}% of current allowance used</small>
+        </article>
+      </section>
+      <section class="usage-grid">
+        <article class="chart-panel"><header><div><span>Evaluation activity</span><h2>This month</h2></div><b>{{ usage.totals.conversations | number }} total conversations</b></header><div class="bars"><i *ngFor="let day of usage.daily" [style.height.%]="day.evaluations ? 20 + (day.evaluations / usage.totals.conversations * 260) : 4" [title]="day.date + ': ' + day.evaluations"></i><p *ngIf="!usage.daily.length">Activity will appear after your first evaluation.</p></div></article>
+        <article class="totals-panel"><span>Workspace inventory</span><div *ngFor="let item of [['Batches',usage.totals.batches],['Conversations',usage.totals.conversations],['Flagged',usage.totals.flagged],['Reviewed',usage.totals.reviewed],['Reports',usage.totals.reports],['Research studies',usage.totals.studies]]"><b>{{ item[0] }}</b><strong>{{ item[1] | number }}</strong></div></article>
+      </section>
+    </ng-container>
+
+    <ng-container *ngIf="view === 'audit' && !loading">
+      <section class="toolbar"><div class="filters"><button *ngFor="let category of ['', 'workspace', 'member', 'billing', 'support']" [class.active]="auditCategory === category" (click)="filterAudit(category)">{{ category || 'All activity' }}</button></div><input [(ngModel)]="search" placeholder="Search actor, action, or target..."></section>
+      <section class="audit-table"><header><span>Event</span><span>Category</span><span>Actor</span><span>Time</span></header><article *ngFor="let item of filteredAudit()"><div class="event"><i>{{ item.action[0] }}</i><span><b>{{ item.action }}</b><small>{{ item.detail || item.target || 'Workspace activity' }}</small></span></div><em>{{ item.category }}</em><span>{{ item.actorEmail }}</span><time>{{ item.createdAt | date:'medium' }}</time></article><div class="empty" *ngIf="!filteredAudit().length">No matching audit activity yet.</div></section>
+      <p class="security-note">Audit records are read-only, authenticated, and scoped to your workspace.</p>
+    </ng-container>
+
+    <ng-container *ngIf="view === 'help' && !loading">
+      <section class="help-search"><span>AgentQA knowledge base</span><h2>How can we help?</h2><input [(ngModel)]="search" placeholder="Search setup, evaluation, billing, or security..."></section>
+      <section class="help-grid">
+        <div class="articles"><article *ngFor="let article of filteredArticles()" (click)="selectedArticle = selectedArticle?.id === article.id ? null : article"><div><span>{{ article.category }}</span><h3>{{ article.title }}</h3><p>{{ article.detail }}</p></div><b>+</b><aside *ngIf="selectedArticle?.id === article.id">For guided assistance with this topic, create a support request below. Include the affected batch or conversation ID so the quality team can investigate securely.</aside></article></div>
+        <aside class="contact-panel"><span>Direct support</span><h2>Contact AgentQA</h2><div><small>Email</small><a href="mailto:{{ support.contact.email }}">{{ support.contact.email }}</a></div><div><small>Phone</small><a href="tel:{{ support.contact.phone }}">{{ support.contact.phone }}</a></div><div><small>Office</small><p>{{ support.contact.address }}</p></div></aside>
+      </section>
+      <section class="ticket-layout"><form (ngSubmit)="submitTicket()"><header><span>Tracked support</span><h2>Create a support ticket</h2><p>Requests are saved securely to your workspace.</p></header><label>Subject<input [(ngModel)]="ticket.subject" name="subject" required placeholder="Briefly describe the issue"></label><div class="form-row"><label>Category<select [(ngModel)]="ticket.category" name="category"><option>product</option><option>billing</option><option>evaluation</option><option>security</option><option>integration</option></select></label><label>Priority<select [(ngModel)]="ticket.priority" name="priority"><option>normal</option><option>high</option><option>urgent</option></select></label></div><label>Details<textarea [(ngModel)]="ticket.message" name="message" required placeholder="Include relevant IDs, expected behavior, and what happened."></textarea></label><button class="primary" [disabled]="submitting">{{ submitting ? 'Submitting...' : 'Submit ticket' }}</button></form><aside class="tickets"><header><span>Your requests</span><b>{{ support.tickets.length }}</b></header><article *ngFor="let item of support.tickets"><div><b>{{ item.subject }}</b><small>{{ item.createdAt | date:'mediumDate' }} · {{ item.category }}</small></div><em [class.resolved]="item.status === 'resolved'">{{ item.status }}</em></article><p *ngIf="!support.tickets.length">No support requests created yet.</p></aside></section>
+    </ng-container>
+  </main>
+</div>

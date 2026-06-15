@@ -26,7 +26,7 @@ async function sendQualityAlert (user, batch) {
 
   const toEmail = user.alertEmail || user.email
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4300'
-  const batchUrl = `${frontendUrl.replace(/\/$/, '')}/#/batches/${batch._id}`
+  const batchUrl = `${frontendUrl.replace(/\/$/, '')}/batches/${batch._id}`
 
   const html = `
     <!doctype html>

@@ -1,0 +1,81 @@
+<div class="product-shell">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="sidebar legacy-sidebar">
+    <a class="brand" routerLink="/dashboard"><span class="brand-mark">AQ</span><span><b>AgentQA</b><small>Quality Intelligence</small></span></a>
+    <nav>
+      <span class="nav-label">Monitor</span>
+      <a routerLink="/dashboard" routerLinkActive="active">▦ <span>Dashboard</span></a>
+      <a routerLink="/batches" routerLinkActive="active">▤ <span>Batches</span></a>
+      <a routerLink="/conversations" routerLinkActive="active">▱ <span>Conversations</span></a>
+      <a routerLink="/alerts" routerLinkActive="active">△ <span>Alerts</span><em>7</em></a>
+      <span class="nav-label">Intelligence</span>
+      <a routerLink="/research" routerLinkActive="active">⌕ <span>Research</span></a>
+      <a routerLink="/analysis" routerLinkActive="active">⌁ <span>Analysis</span></a>
+      <a routerLink="/reports" routerLinkActive="active">▥ <span>Reports</span></a>
+      <span class="nav-label">Manage</span>
+      <a routerLink="/settings/workspace" routerLinkActive="active">⚙ <span>Settings</span></a>
+      <a routerLink="/usage" routerLinkActive="active">◫ <span>Usage</span></a>
+      <a routerLink="/pricing" routerLinkActive="active">$ <span>Plans</span></a>
+    </nav>
+    <button class="user-card" type="button" (click)="signOut()"><span>RH</span><div><b>Rao Hasnain</b><small>Sign out</small></div><i>⋮</i></button>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar">
+      <label class="search-box">⌕ <input [(ngModel)]="search" placeholder="Search AgentQA..." /><kbd>⌘ K</kbd></label>
+      <div class="top-actions"><button title="Create" (click)="runPrimaryAction()">+</button><button title="Notifications" (click)="notificationsOpen = !notificationsOpen">♧<i></i></button><a routerLink="/settings/profile">RH</a></div>
+      <div class="notification-popover" *ngIf="notificationsOpen"><b>Quality alerts</b><span>1 flagged conversation needs review.</span><a routerLink="/alerts">Open alerts →</a></div>
+    </header>
+
+    <main class="page">
+      <header class="page-head">
+        <div><p>{{ config.eyebrow }}</p><h1>{{ config.title }}</h1><span>{{ config.description }}</span></div>
+        <div class="head-actions"><button class="ghost" (click)="exportView()">⇩ Export</button><button class="primary" [disabled]="actionBusy" (click)="runPrimaryAction()">{{ actionBusy ? 'Working...' : (config.primary || 'Create new') }} →</button></div>
+      </header>
+      <div class="notice" *ngIf="notice" [class.error]="noticeTone === 'error'">{{ notice }}</div>
+      <div class="loading-strip" *ngIf="loading"><i></i></div>
+
+      <ng-container *ngIf="config.mode !== 'settings' && config.mode !== 'form' && config.mode !== 'live'">
+        <section class="metrics">
+          <article *ngFor="let metric of metrics" [class]="metric.tone"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small>{{ metric.delta }} this period</small></article>
+        </section>
+      </ng-container>
+
+      <section class="live-screen" *ngIf="config.mode === 'live'">
+        <div class="radar"><div class="radar-sweep"></div><div class="radar-core">{{ liveProgress }}%</div><i></i><i></i><i></i></div>
+        <div class="live-copy"><span class="live-pill"><i></i> Live analysis</span><h2>Analyzing production conversations</h2><p>AgentQA is scoring events, correlating policy evidence, and detecting regressions in real time.</p>
+          <div class="live-progress"><span [style.width.%]="liveProgress"></span></div>
+          <div class="live-stats"><b>{{ liveEvents }}<small>events processed</small></b><b>14<small>issues detected</small></b><b>02:18<small>elapsed time</small></b></div>
+          <button class="danger" (click)="stopAnalysis()">Stop analysis</button>
+        </div>
+        <aside class="event-stream"><h3>Live event stream</h3><p *ngFor="let row of rows; let i = index"><i [class.warn]="i === 0 || i === 4"></i><span><b>{{ row.name }}</b><small>{{ row.updated }}</small></span><em>{{ row.score }}</em></p></aside>
+      </section>
+
+      <ng-container *ngIf="config.mode === 'table' || config.mode === 'analysis' || config.mode === 'report'">
+        <section class="toolbar"><div class="tabs"><button *ngFor="let tab of tabs" [class.active]="selectedTab === tab" (click)="selectedTab = tab">{{ tab }}</button></div><div class="filters"><button (click)="dateFilter = dateFilter === 'Last 30 days' ? 'All time' : 'Last 30 days'">{{ dateFilter }}⌄</button><button (click)="cycleStatus()">{{ statusFilter }} statuses⌄</button><button title="Refresh" (click)="loadRealData()">↻</button></div></section>
+        <section class="analysis-grid" *ngIf="config.mode === 'analysis' || config.mode === 'report'">
+          <article class="trend-panel"><div class="panel-title"><div><span>{{ config.metricLabel || 'Quality trend' }}</span><strong>{{ config.metricValue || '84.6' }}</strong></div><em>+8.2%</em></div><div class="chart"><i style="--h:38%"></i><i style="--h:52%"></i><i style="--h:45%"></i><i style="--h:68%"></i><i style="--h:61%"></i><i style="--h:77%"></i><i style="--h:72%"></i><i style="--h:88%"></i><i style="--h:81%"></i><i style="--h:94%"></i></div><footer><span>May 14</span><span>May 21</span><span>May 28</span><span>Jun 8</span></footer></article>
+          <article class="dimension-panel"><div class="panel-title"><span>Dimension health</span><a>View details</a></div><p *ngFor="let item of [['Accuracy','91'],['Policy','76'],['Resolution','84'],['Tone','93'],['Escalation','68']]"><span>{{ item[0] }}</span><i><b [style.width.%]="+item[1]"></b></i><strong>{{ item[1] }}</strong></p></article>
+        </section>
+        <section class="data-panel">
+          <div class="panel-title"><div><span>{{ selectedTab }} records</span><small>{{ filteredRows().length }} results</small></div><label>⌕ <input [(ngModel)]="search" placeholder="Filter results..." /></label></div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Owner</th><th>Status</th><th>Score</th><th>Updated</th><th></th></tr></thead><tbody><tr *ngFor="let row of filteredRows()"><td><b>{{ row.name }}</b></td><td>{{ row.owner }}</td><td><span class="status" [class.critical]="row.status === 'Critical'" [class.running]="row.status === 'Running'">{{ row.status }}</span></td><td><strong [class.low]="row.score < 60">{{ row.score }}</strong></td><td>{{ row.updated }}</td><td>›</td></tr></tbody></table></div>
+        </section>
+      </ng-container>
+
+      <section class="research-grid" *ngIf="config.mode === 'research'">
+        <article class="research-card" *ngFor="let card of researchCards" (click)="openStudy(card)"><header><span>{{ card.tag }}</span><button title="Open study" (click)="openStudy(card); $event.stopPropagation()">⋮</button></header><h2>{{ card.title }}</h2><p>{{ card.detail }}</p><div class="confidence"><span>Confidence</span><b>{{ card.score }}%</b></div><i><b [style.width.%]="card.score"></b></i><footer><span>MongoDB study</span><button (click)="openStudy(card); $event.stopPropagation()">Open study →</button></footer></article>
+      </section>
+
+      <section class="settings-layout" *ngIf="config.mode === 'settings'">
+        <aside><a routerLink="/settings/profile">Profile</a><a routerLink="/settings/workspace">Workspace</a><a routerLink="/settings/members">Members</a><a routerLink="/settings/integrations">Integrations</a><a routerLink="/settings/models">Models</a><a routerLink="/settings/api-keys">API keys</a><a routerLink="/settings/billing">Billing</a><a routerLink="/settings/notifications">Notifications</a><a routerLink="/settings/security">Security</a></aside>
+        <section class="settings-panel"><div class="settings-row" *ngFor="let item of settings"><div><b>{{ item.label }}</b><span>Configure the default value used across your workspace.</span></div><input [(ngModel)]="item.value" [disabled]="item.label === 'Plan'" /></div><div class="settings-row"><div><b>Operational notifications</b><span>Receive alerts for critical failures and completed runs.</span></div><label class="switch"><input type="checkbox" checked /><i></i></label></div><footer><button class="ghost" (click)="loadRealData()">Cancel</button><button class="primary" [disabled]="actionBusy" (click)="saveSettings()">Save changes</button></footer></section>
+      </section>
+
+      <section class="form-layout" *ngIf="config.mode === 'form'">
+        <form><label>Project name<input [(ngModel)]="projectName" name="projectName" placeholder="Enter a clear project name" /></label><label>Objective<textarea [(ngModel)]="objective" name="objective" placeholder="Describe what you want AgentQA to research or evaluate..."></textarea></label><div class="form-grid"><label>Evaluation model<select><option>Gemini 2.5 Flash</option><option>Local evidence evaluator</option></select></label><label>Dataset<select><option>Production conversations</option><option>Support benchmark</option></select></label></div><label>Quality dimensions<div class="check-grid"><span><input type="checkbox" checked /> Accuracy</span><span><input type="checkbox" checked /> Policy adherence</span><span><input type="checkbox" checked /> Resolution</span><span><input type="checkbox" /> Latency</span></div></label><footer><button class="ghost" type="button" (click)="showNotice('Draft retained in this browser session.')">Save draft</button><button class="primary" type="button" [disabled]="actionBusy" (click)="startWorkflow()">Start workflow →</button></footer></form>
+        <aside class="form-preview"><span>Configuration preview</span><h2>Ready to analyze</h2><p>Your workflow will evaluate production conversations using the selected quality dimensions.</p><div><b>Est. runtime</b><strong>4m 20s</strong></div><div><b>Est. usage</b><strong>1,240 evals</strong></div></aside>
+      </section>
+    </main>
+  </section>
+</div>

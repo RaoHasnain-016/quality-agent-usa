@@ -1,0 +1,89 @@
+<div class="landing">
+  <header class="nav" [class.scrolled]="scrolled">
+    <a class="brand" routerLink="/"><span>AQ</span><b>Agentic QA</b><small>AI Quality Intelligence</small></a>
+    <button class="menu" type="button" (click)="menuOpen = !menuOpen" aria-label="Open navigation">☰</button>
+    <nav [class.open]="menuOpen">
+      <button (click)="scrollTo('platform')">Platform</button>
+      <button (click)="scrollTo('features')">Features</button>
+      <button (click)="scrollTo('workflow')">How it works</button>
+      <a routerLink="/pricing">Pricing</a>
+      <button (click)="scrollTo('contact')">Contact</button>
+    </nav>
+    <div class="nav-actions"><a routerLink="/login">Sign in</a><a class="primary" routerLink="/signup">Start free</a></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <img src="assets/agentqa-hero.png" alt="Agentic QA quality operations dashboard" />
+      <div class="hero-shade"></div>
+      <div class="hero-copy">
+        <p class="eyebrow"><i></i> Production-grade AI quality assurance</p>
+        <h1>Know exactly when your AI agent fails.</h1>
+        <p class="lead">Monitor conversations, detect policy violations, research root causes, and turn every failure into a measurable quality improvement.</p>
+        <div class="hero-actions"><a class="primary large" routerLink="/signup">Start evaluating free →</a><button class="secondary large" (click)="scrollTo('demo')">View product demo</button></div>
+        <div class="hero-proof"><span><b>5</b> free batch files monthly</span><span><b>100%</b> feature access</span><span><b>5</b> quality dimensions</span></div>
+      </div>
+      <div class="hero-status"><span>LIVE QUALITY</span><strong>91.4</strong><small>Production score</small><i><b></b></i></div>
+    </section>
+
+    <section class="trust-band">
+      <span>BUILT FOR TEAMS SHIPPING AI INTO PRODUCTION</span>
+      <div><b>Support AI</b><b>Voice Agents</b><b>Sales Copilots</b><b>Agentic Workflows</b><b>LLM Applications</b></div>
+    </section>
+
+    <section class="platform section" id="platform">
+      <header class="section-head"><p>One operational workspace</p><h2>Quality assurance that keeps pace with your AI.</h2><span>Agentic QA combines evaluation, monitoring, research, and reporting so your team can move from signal to resolution without losing context.</span></header>
+      <div class="platform-grid">
+        <article class="metric-main"><span>Quality score</span><strong>86.2<small>/100</small></strong><div class="signal"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><footer><b>+8.4%</b><span>after policy update</span></footer></article>
+        <article><span>Conversations evaluated</span><strong>24,892</strong><small>Every interaction scored and searchable</small></article>
+        <article><span>Critical failures caught</span><strong class="alert-text">184</strong><small>Before they became customer escalations</small></article>
+        <article class="wide"><div><span>Dimension health</span><h3>Understand the reason behind every score.</h3></div><div class="bars"><p>Accuracy <i><b style="width:91%"></b></i><strong>91</strong></p><p>Policy <i><b style="width:76%"></b></i><strong>76</strong></p><p>Resolution <i><b style="width:84%"></b></i><strong>84</strong></p><p>Tone <i><b style="width:93%"></b></i><strong>93</strong></p></div></article>
+      </div>
+    </section>
+
+    <section class="features section" id="features">
+      <header class="section-head left"><p>Quality intelligence</p><h2>Every capability your AI quality team needs.</h2></header>
+      <div class="feature-grid">
+        <article><span>01</span><i>◎</i><h3>Continuous evaluation</h3><p>Upload production conversations and score accuracy, policy, resolution, tone, and escalation using Gemini-powered judges.</p><a routerLink="/signup">Evaluate conversations →</a></article>
+        <article><span>02</span><i>△</i><h3>Failure monitoring</h3><p>Prioritize critical failures, track regressions, and notify the right people before quality issues spread.</p><a routerLink="/analysis">Explore analysis →</a></article>
+        <article><span>03</span><i>⌕</i><h3>Evidence-backed research</h3><p>Turn recurring issues into structured studies with findings, confidence scores, and source-level evidence.</p><a routerLink="/research">Open research →</a></article>
+        <article><span>04</span><i>▥</i><h3>Executive reporting</h3><p>Communicate quality, operational risk, and recommendations through stakeholder-ready reports and exports.</p><a routerLink="/reports">View reports →</a></article>
+        <article><span>05</span><i>↻</i><h3>Human review workflow</h3><p>Review flagged conversations, override scores with an audit trail, and continuously improve evaluation decisions.</p><a routerLink="/conversations">Review workflow →</a></article>
+        <article><span>06</span><i>⚙</i><h3>Policy-aware judging</h3><p>Evaluate agents against your actual company policy instead of generic quality guidelines.</p><a routerLink="/settings/workspace">Configure policies →</a></article>
+      </div>
+    </section>
+
+    <section class="demo section" id="demo">
+      <header class="section-head"><p>Product walkthrough</p><h2>See a failure become an action plan.</h2><span>From batch evaluation to evidence-backed root cause research in one connected workflow.</span></header>
+      <button class="demo-window" (click)="demoPlaying = !demoPlaying" [class.playing]="demoPlaying">
+        <div class="demo-top"><span>Agentic QA / Live analysis</span><em>{{ demoPlaying ? 'LIVE' : 'PLAY DEMO' }}</em></div>
+        <div class="demo-body">
+          <aside><i></i><i></i><i></i><i></i><i></i></aside>
+          <section><div class="demo-score"><span>Quality score</span><strong>{{ demoPlaying ? '84.7' : '78.2' }}</strong><small>{{ demoPlaying ? '+6.5 improvement' : 'Baseline detected' }}</small></div><div class="demo-chart"><i *ngFor="let h of [42,55,49,68,63,76,71,86,83,94]" [style.height.%]="h"></i></div><div class="demo-events"><p><b></b>Policy conflict found <span>Critical</span></p><p><b></b>Escalation path validated <span>Passed</span></p><p><b></b>Research finding generated <span>Ready</span></p></div></section>
+        </div>
+        <div class="play"><span>{{ demoPlaying ? 'Ⅱ' : '▶' }}</span>{{ demoPlaying ? 'Pause live simulation' : 'Play product simulation' }}</div>
+      </button>
+    </section>
+
+    <section class="workflow section" id="workflow">
+      <header class="section-head left"><p>From data to decision</p><h2>Operational in three steps.</h2></header>
+      <div class="steps"><article><b>01</b><h3>Connect your conversations</h3><p>Upload CSV or JSON batches and configure the policies your AI agents must follow.</p></article><article><b>02</b><h3>Evaluate with evidence</h3><p>Agentic QA scores every interaction and identifies the exact behavior requiring attention.</p></article><article><b>03</b><h3>Improve with confidence</h3><p>Review failures, research patterns, share reports, and measure quality movement over time.</p></article></div>
+    </section>
+
+    <section class="pricing-preview section">
+      <div><p>Simple testing-phase pricing</p><h2>Every feature is included on Free.</h2><span>Start with five batch files every month. Upgrade only when your evaluation volume grows.</span></div>
+      <article><span>FREE</span><strong>$0<small>/month</small></strong><ul><li>All Agentic QA features</li><li>5 batch files per month</li><li>Gemini-powered evaluation</li><li>Research and reporting</li></ul><a class="primary" routerLink="/signup">Start free →</a></article>
+      <article class="pro"><span>PRO</span><strong>$149<small>/month</small></strong><ul><li>Everything in Free</li><li>250 batch files per month</li><li>10,000 evaluations</li><li>Priority evaluation queue</li></ul><a class="secondary" routerLink="/pricing">Compare plans →</a></article>
+    </section>
+
+    <section class="contact section" id="contact">
+      <div><p>Build AI customers can trust</p><h2>Make quality measurable before your next release.</h2><span>Talk with the Agentic QA team about evaluation strategy, production monitoring, or enterprise deployment.</span><div class="contact-links"><a href="mailto:hasnain.devconnect@gmail.com">hasnain.devconnect&#64;gmail.com</a><a href="tel:+923046838346">+92 304 6838346</a><address>Agentic QA Office, Multan Road, Vehari</address></div></div>
+      <aside><h3>Start evaluating today</h3><p>All features included. No credit card required for the Free plan.</p><a class="primary large" routerLink="/signup">Create free workspace →</a><a class="secondary large" href="mailto:hasnain.devconnect@gmail.com">Contact our team</a></aside>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main"><div><a class="brand" routerLink="/"><span>AQ</span><b>Agentic QA</b></a><p>Production-grade quality intelligence for AI agents and LLM applications.</p></div><nav><b>Platform</b><a routerLink="/dashboard">Dashboard</a><a routerLink="/analysis">Analysis</a><a routerLink="/research">Research</a><a routerLink="/reports">Reports</a></nav><nav><b>Company</b><button (click)="scrollTo('contact')">Contact</button><a href="mailto:hasnain.devconnect@gmail.com">Email</a><a href="tel:+923046838346">Phone</a><span>Vehari, Pakistan</span></nav><nav><b>Account</b><a routerLink="/pricing">Pricing</a><a routerLink="/login">Sign in</a><a routerLink="/signup">Create account</a><a routerLink="/help">Help center</a></nav></div>
+    <div class="footer-bottom"><span>© {{ currentYear }} Agentic QA. All rights reserved.</span><span>Privacy · Terms · Security</span></div>
+  </footer>
+</div>

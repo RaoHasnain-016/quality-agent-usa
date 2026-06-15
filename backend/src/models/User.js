@@ -2,25 +2,33 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const { Schema } = mongoose
 
-const PLAN_LIMITS = {
-  free: 100,
-  starter: 1000,
-  pro: 10000,
-  team: 1000000
-}
+const { getPlan } = require('../services/planService')
 
 const userSchema = new Schema({
   firebaseUid: { type: String, unique: true, sparse: true, index: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
   passwordHash: { type: String, default: '' },
   company: { type: String, default: '', trim: true },
+  displayName: { type: String, default: '', trim: true },
+  timezone: { type: String, default: 'Asia/Karachi', trim: true },
+  theme: { type: String, enum: ['midnight', 'graphite', 'ocean', 'light'], default: 'midnight' },
+  dataRetentionDays: { type: Number, default: 90, min: 7, max: 3650 },
+  notificationsEnabled: { type: Boolean, default: true },
+  weeklyDigest: { type: Boolean, default: true },
+  requireReviewForFlagged: { type: Boolean, default: true },
   plan: { type: String, enum: ['free', 'starter', 'pro', 'team'], default: 'free' },
   alertThreshold: { type: Number, default: 70, min: 0, max: 100 },
   alertEmail: { type: String, default: '', trim: true },
   companyPolicy: { type: String, default: '' },
   evalUsed: { type: Number, default: 0 },
   evalLimit: { type: Number, default: 100 },
+  batchUploadsUsed: { type: Number, default: 0 },
+  batchUploadLimit: { type: Number, default: 5 },
   usageResetAt: { type: Date, default: () => firstDayOfNextMonth() },
+  stripeCustomerId: { type: String, default: '', index: true },
+  stripeSubscriptionId: { type: String, default: '', index: true },
+  subscriptionStatus: { type: String, default: 'inactive' },
+  subscriptionCurrentPeriodEnd: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 })
@@ -32,7 +40,9 @@ function firstDayOfNextMonth () {
 
 userSchema.pre('save', function (next) {
   this.updatedAt = new Date()
-  this.evalLimit = PLAN_LIMITS[this.plan] || PLAN_LIMITS.free
+  const plan = getPlan(this.plan)
+  this.evalLimit = plan.evalLimit
+  this.batchUploadLimit = plan.batchUploadLimit
   next()
 })
 
@@ -46,9 +56,17 @@ userSchema.methods.comparePassword = async function (password) {
 }
 
 userSchema.methods.resetMonthlyUsageIfNeeded = async function () {
-  if (this.usageResetAt && this.usageResetAt > new Date()) return this
-  this.evalUsed = 0
-  this.usageResetAt = firstDayOfNextMonth()
+  const plan = getPlan(this.plan)
+  const needsReset = !this.usageResetAt || this.usageResetAt <= new Date()
+  const needsSync = this.evalLimit !== plan.evalLimit || this.batchUploadLimit !== plan.batchUploadLimit
+  if (!needsReset && !needsSync) return this
+  if (needsReset) {
+    this.evalUsed = 0
+    this.batchUploadsUsed = 0
+    this.usageResetAt = firstDayOfNextMonth()
+  }
+  this.evalLimit = plan.evalLimit
+  this.batchUploadLimit = plan.batchUploadLimit
   return this.save()
 }
 
@@ -61,12 +79,23 @@ userSchema.methods.toSafeJSON = function () {
     id: this._id,
     email: this.email,
     company: this.company,
+    displayName: this.displayName,
+    timezone: this.timezone,
+    theme: this.theme,
+    dataRetentionDays: this.dataRetentionDays,
+    notificationsEnabled: this.notificationsEnabled,
+    weeklyDigest: this.weeklyDigest,
+    requireReviewForFlagged: this.requireReviewForFlagged,
     plan: this.plan,
     alertThreshold: this.alertThreshold,
     alertEmail: this.alertEmail,
     companyPolicy: this.companyPolicy,
     evalUsed: this.evalUsed,
     evalLimit: this.evalLimit,
+    batchUploadsUsed: this.batchUploadsUsed,
+    batchUploadLimit: this.batchUploadLimit,
+    subscriptionStatus: this.subscriptionStatus,
+    subscriptionCurrentPeriodEnd: this.subscriptionCurrentPeriodEnd,
     usageResetAt: this.usageResetAt,
     createdAt: this.createdAt
   }

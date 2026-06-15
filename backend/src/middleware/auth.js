@@ -13,11 +13,12 @@ async function findOrCreateFirebaseUser (decoded) {
     user = await User.create({
       firebaseUid: decoded.uid,
       email,
-      company: '',
+      company: decoded.name || '',
       plan: 'free'
     })
-  } else if (!user.firebaseUid) {
-    user.firebaseUid = decoded.uid
+  } else {
+    user.firebaseUid = user.firebaseUid || decoded.uid
+    if (!user.company && decoded.name) user.company = decoded.name
     await user.save()
   }
 

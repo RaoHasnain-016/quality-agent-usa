@@ -19,7 +19,26 @@ async function createAndProcessBatch (userId, file, batchName) {
     throw new Error(`Quota exceeded. ${remaining} evaluations remaining, uploaded file has ${conversations.length}.`)
   }
 
-  const batch = await Batch.create({
+  const reserved = await User.findOneAndUpdate(
+    {
+      _id: user._id,
+      $expr: {
+        $lt: [
+          { $ifNull: ['$batchUploadsUsed', 0] },
+          { $ifNull: ['$batchUploadLimit', 5] }
+        ]
+      }
+    },
+    { $inc: { batchUploadsUsed: 1 } },
+    { new: true }
+  )
+  if (!reserved) {
+    throw new Error(`Monthly file limit reached. Your ${user.plan} plan allows ${user.batchUploadLimit} files per month.`)
+  }
+
+  let batch
+  try {
+    batch = await Batch.create({
     userId: user._id,
     batchName,
     name: batchName,
@@ -27,7 +46,7 @@ async function createAndProcessBatch (userId, file, batchName) {
     totalConversations: conversations.length,
     totalCount: conversations.length,
     alertThreshold: user.alertThreshold
-  })
+    })
 
   const docs = conversations.map(conversation => ({
     batchId: batch._id,
@@ -36,9 +55,8 @@ async function createAndProcessBatch (userId, file, batchName) {
     rawText: conversation.rawText
   }))
 
-  const inserted = await Conversation.insertMany(docs)
-  user.evalUsed += inserted.length
-  await user.save()
+    const inserted = await Conversation.insertMany(docs)
+    await User.findByIdAndUpdate(user._id, { $inc: { evalUsed: inserted.length } })
 
   setImmediate(async () => {
     try {
@@ -53,12 +71,17 @@ async function createAndProcessBatch (userId, file, batchName) {
     }
   })
 
-  return {
+    return {
     batchId: batch._id,
     batchName: batch.batchName,
     totalConversations: inserted.length,
     status: batch.status,
     message: 'Evaluation started'
+    }
+  } catch (error) {
+    await User.findByIdAndUpdate(user._id, { $inc: { batchUploadsUsed: -1 } })
+    if (batch?._id) await Batch.findByIdAndDelete(batch._id)
+    throw error
   }
 }
 

@@ -1,0 +1,25 @@
+<main class="auth-page">
+  <a class="brand" routerLink="/login"><span>AQ</span> AgentQA</a>
+  <section class="auth-card">
+    <aside>
+      <span class="eyebrow">Quality intelligence platform</span>
+      <h1>Ship reliable AI experiences with confidence.</h1>
+      <p>Evaluate conversations, research failures, and monitor regressions from one operational workspace.</p>
+      <div class="proof"><b>99.4%</b><span>evaluation uptime</span><b>24M+</b><span>conversations analyzed</span></div>
+      <blockquote>“AgentQA gives our quality team a clear answer before customers find the problem.”</blockquote>
+    </aside>
+    <form (ngSubmit)="submit()">
+      <header><span>{{ mode === 'signup' ? '01' : '→' }}</span><div><h2>{{ title }}</h2><p>{{ subtitle }}</p></div></header>
+      <button *ngIf="mode === 'signup' || mode === 'invite'" type="button" class="google" (click)="continueWithGoogle()"><b>G</b> Continue with Google</button>
+      <p class="auth-error" *ngIf="error">{{ error }}</p>
+      <div *ngIf="mode === 'signup' || mode === 'invite'" class="divider"><i></i><span>or continue manually</span><i></i></div>
+      <label *ngIf="mode === 'signup' || mode === 'invite'">Full name<input [(ngModel)]="name" name="name" placeholder="Your full name" /></label>
+      <label *ngIf="mode !== 'reset' && mode !== 'verify'">Work email<input [(ngModel)]="email" name="email" type="email" placeholder="you@company.com" /></label>
+      <label *ngIf="mode === 'signup' || mode === 'invite' || mode === 'reset'">Password<input [(ngModel)]="password" name="password" type="password" placeholder="At least 8 characters" /></label>
+      <label *ngIf="mode === 'verify'">Verification code<input name="code" placeholder="000 000" /></label>
+      <button class="primary" type="submit" [class.loading]="submitted">{{ submitted ? 'Processing...' : (mode === 'signup' ? 'Create account' : mode === 'invite' ? 'Accept invitation' : 'Continue') }} →</button>
+      <p class="footer-copy" *ngIf="mode === 'signup'">Already have an account? <a routerLink="/login">Sign in</a></p>
+      <p class="footer-copy" *ngIf="mode !== 'signup'"><a routerLink="/login">← Back to sign in</a></p>
+    </form>
+  </section>
+</main>

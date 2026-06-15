@@ -1,14 +1,15 @@
 <div class="app-shell">
-  <aside class="sidebar">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="sidebar legacy-sidebar">
     <a class="brand" routerLink="/dashboard"><span class="brand-icon">▣</span><span><b>AgentQA</b><small>AI Monitoring</small></span></a>
     <nav>
       <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
       <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
-      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
-      <a routerLink="/onboarding/threshold">⚙ Settings</a>
-      <a href="#">▣ Usage & Billing</a>
+      <a routerLink="/conversations" routerLinkActive="active">▱ Conversations</a>
+      <a routerLink="/settings/workspace">⚙ Settings</a>
+      <a routerLink="/pricing">▣ Usage & Billing</a>
     </nav>
-    <a class="help" href="#">? Help</a>
+    <a class="help" routerLink="/help">? Help</a>
   </aside>
 
   <main class="stage">
@@ -28,7 +29,7 @@
         </div>
       </div>
       <p>You will receive an email when complete</p>
-      <a routerLink="/batches/oct-support-logs">Close and check back later</a>
+      <a routerLink="/batches">Close and check back later</a>
     </section>
   </main>
 </div>

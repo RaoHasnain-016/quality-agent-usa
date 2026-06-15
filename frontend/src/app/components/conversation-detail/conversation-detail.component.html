@@ -1,51 +1,49 @@
 <div class="conversation-shell">
-  <aside class="sidebar">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="sidebar legacy-sidebar">
     <a class="brand" routerLink="/dashboard"><b>AgentQA</b><small>AI Monitoring</small></a>
     <nav>
       <a routerLink="/dashboard" routerLinkActive="active">▦ Dashboard</a>
       <a routerLink="/batches" routerLinkActive="active">▤ Batches</a>
-      <a routerLink="/conversations/conv_047" routerLinkActive="active">▱ Conversations</a>
-      <a routerLink="/onboarding/threshold">⚙ Settings</a>
-      <a href="#">▣ Usage & Billing</a>
+      <a routerLink="/conversations" routerLinkActive="active">▱ Conversations</a>
+      <a routerLink="/settings/workspace">⚙ Settings</a>
+      <a routerLink="/pricing">▣ Usage & Billing</a>
     </nav>
-    <a class="help">? Help</a>
+    <a class="help" routerLink="/help">? Help</a>
   </aside>
 
   <main class="workspace">
     <header class="top">
-      <div class="crumb"><a routerLink="/batches">Batches</a> › <a routerLink="/batches/oct-support-logs">Oct Support Logs</a> › <b>conv_047</b></div>
-      <div class="actions"><button>↩ Override Score</button><button class="primary">◎ Mark as Reviewed</button></div>
+      <div class="crumb"><a routerLink="/batches">Batches</a> › <b>{{ conversation?.externalId || id }}</b></div>
+      <div class="actions"><button (click)="overrideScore()">↩ Override Score</button><button class="primary" (click)="markReviewed()">◎ {{ conversation?.reviewed ? 'Reviewed' : 'Mark as Reviewed' }}</button></div>
     </header>
 
     <section class="transcript">
-      <div class="transcript-head"><h1>Conversation Transcript</h1><span>ID: conv_047</span><span>Dur: 04:12</span></div>
+      <div class="transcript-head"><h1>Conversation Transcript</h1><span>ID: {{ conversation?.externalId || id }}</span><span>{{ conversation?.reviewed ? 'Reviewed' : 'Pending review' }}</span></div>
+      <p *ngIf="notice">{{ notice }}</p>
       <div class="messages">
-        <article class="msg customer"><i>♙</i><div><b>Customer <small>10:42 AM</small></b><p>Hi, I need to return an item I bought 45 days ago. It hasn't been opened.</p></div></article>
-        <article class="msg agent right"><div><b><small>10:42 AM</small> AgentQA AI</b><p>Hello! I can help you with that. Could you please provide your order number?</p></div><i>▣</i></article>
-        <article class="msg customer"><i>♙</i><div><b>Customer <small>10:43 AM</small></b><p>Sure, it's ORD-99823-XYZ.</p></div></article>
-        <article class="msg agent right flagged"><div><b>⚠ Flagged <small>10:43 AM</small> AgentQA AI</b><p>I've checked your order. Unfortunately, our return policy only allows returns within 30 days of purchase. I cannot process this return.</p><em>Policy Violation detected</em></div><i>▣</i></article>
-        <article class="msg customer"><i>♙</i><div><b>Customer <small>10:45 AM</small></b><p>But your website says holiday purchases have a 60-day return window?</p></div></article>
+        <article class="msg customer" *ngIf="conversation"><i>QA</i><div><b>Source transcript</b><p>{{ conversation.rawText }}</p></div></article>
+        <article class="msg customer" *ngIf="!conversation"><i>♙</i><div><b>Loading</b><p>Loading conversation data...</p></div></article>
       </div>
       <footer>Showing 47 of 1,204 <span>‹ ›</span></footer>
     </section>
 
     <aside class="report">
-      <header><div><h1>AI Evaluation Report</h1><p>Auto-evaluated 2 mins ago</p></div><div class="score">42 <small>/100</small><b>Critical Failure</b></div></header>
+      <header><div><h1>AI Evaluation Report</h1><p>Persisted AI evaluation</p></div><div class="score">{{ conversation?.overrideScore ?? conversation?.overallScore ?? 0 }} <small>/100</small><b>{{ conversation?.flagged ? 'Needs Review' : 'Passed' }}</b></div></header>
       <section class="score-list">
         <div *ngFor="let score of scores" [class]="score[2]">
           <b>{{ score[0] }}</b>
-          <span><i [style.width.%]="+score[1] * 10"></i></span>
-          <strong>{{ score[1] }}/10</strong>
+          <span><i [style.width.%]="+score[1]"></i></span>
+          <strong>{{ score[1] }}/100</strong>
         </div>
       </section>
       <section class="issues">
         <h2>ⓘ Issues Found</h2>
-        <p class="critical"><b>Hallucinated Policy:</b> Agent applied standard 30-day rule instead of active "Holiday 60-day" exception.</p>
-        <p>Failed to offer immediate escalation when customer contested the policy directly.</p>
+        <p *ngFor="let issue of conversation?.issues; let first = first" [class.critical]="first">{{ issue }}</p>
       </section>
       <section>
         <h2>AI Summary</h2>
-        <blockquote>The agent correctly identified the user and order, maintaining a polite tone initially. However, it failed to reference the updated Holiday Return Policy logic node, resulting in an incorrect denial of service.</blockquote>
+        <blockquote>{{ conversation?.summary || 'Evaluation summary is loading.' }}</blockquote>
       </section>
     </aside>
   </main>

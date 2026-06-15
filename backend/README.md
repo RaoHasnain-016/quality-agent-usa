@@ -26,21 +26,32 @@ npm install
 copy .env.example .env
 ```
 
-Fill these values in `.env`:
+The default example connects to the local MongoDB service visible in Compass:
 
 ```env
-MONGODB_URI=...
-JWT_SECRET=...
-GEMINI_API_KEY=...
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DB=agentic_qa
+AI_PROVIDER=local
 ```
 
-Firebase Admin and Resend are optional. If they are missing, JWT auth still works and email alerts are skipped.
+The local AI evaluator and JWT login work without external APIs. Optional integrations:
+
+- `GEMINI_API_KEY`: stronger LLM-based transcript evaluation.
+- Firebase Web/Admin credentials: Google sign-in.
+- `RESEND_API_KEY`: email quality alerts.
+- Stripe secret, webhook secret, and price IDs: paid Checkout and Customer Portal.
+
+Free accounts have access to every product feature and can upload five batch
+files per month. Paid plan state is updated only from signed Stripe webhooks.
 
 ## Run
 
 ```bash
+npm run seed
 npm run dev
 ```
+
+Seed login: `admin@agentqa.local` / `AgentQA123!`
 
 Health check:
 
@@ -67,6 +78,20 @@ GET    /api/conversations/:id
 
 GET    /api/dashboard/stats
 GET    /api/dashboard/recent-batches
+
+GET    /api/analysis/overview
+GET    /api/analysis/trends
+GET    /api/ai/status
+POST   /api/ai/evaluate
+GET    /api/research
+POST   /api/research
+POST   /api/research/:id/run
+GET    /api/reports/executive
+GET    /api/billing/plans
+GET    /api/billing/subscription
+POST   /api/billing/checkout
+POST   /api/billing/portal
+POST   /api/billing/webhook
 
 GET    /api/settings
 PUT    /api/settings

@@ -1,5 +1,6 @@
 <div class="dashboard-shell">
-  <aside class="side-nav">
+  <app-workspace-sidebar></app-workspace-sidebar>
+  <aside class="side-nav legacy-sidebar">
     <a class="brand" routerLink="/dashboard" aria-label="AgentQA dashboard">
       <span class="brand-mark">▣</span>
       <span>
@@ -9,6 +10,7 @@
     </a>
 
     <nav class="primary-nav" aria-label="Primary">
+      <span class="nav-label">Monitor</span>
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">▦</span>
         Dashboard
@@ -17,25 +19,55 @@
         <span class="nav-icon">▤</span>
         Batches
       </a>
-      <a routerLink="/conversations/overview" routerLinkActive="active" class="nav-item">
+      <a routerLink="/conversations" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">▱</span>
         Conversations
       </a>
     </nav>
 
-    <nav class="utility-nav" aria-label="Utilities">
+    <nav class="intelligence-nav" aria-label="Intelligence">
+      <span class="nav-label">Intelligence</span>
+      <a routerLink="/alerts" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">!</span>
+        <span>Alerts</span>
+        <em>{{ topIssues.length }}</em>
+      </a>
+      <a routerLink="/research" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">R</span>
+        <span>Research</span>
+      </a>
+      <a routerLink="/analysis" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">A</span>
+        <span>Analysis</span>
+      </a>
+      <a routerLink="/reports" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">P</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+
+    <nav class="utility-nav" aria-label="Workspace">
+      <span class="nav-label">Workspace</span>
       <a routerLink="/settings" routerLinkActive="active" class="nav-item">
         <span class="nav-icon">⚙</span>
         Settings
       </a>
-      <a class="nav-item" href="#" aria-disabled="true">
+      <a class="nav-item" routerLink="/pricing">
         <span class="nav-icon">▣</span>
         Usage &amp; Billing
       </a>
-      <a class="nav-item" href="#" aria-disabled="true">
+      <a class="nav-item" routerLink="/audit-log" routerLinkActive="active">
+        <span class="nav-icon">L</span>
+        Audit Log
+      </a>
+      <a class="nav-item" routerLink="/help">
         <span class="nav-icon">?</span>
         Help
       </a>
+      <button class="logout-nav nav-item" type="button" (click)="logout()">
+        <span class="nav-icon">X</span>
+        Log out
+      </button>
     </nav>
   </aside>
 
@@ -43,21 +75,37 @@
     <header class="top-bar">
       <label class="search-field">
         <span>⌕</span>
-        <input type="search" placeholder="Search evaluations, batches, conversations..." />
+        <input [(ngModel)]="search" type="search" placeholder="Search recent batches..." />
       </label>
 
       <div class="top-actions">
-        <button type="button" class="icon-button" aria-label="Notifications">
+        <button type="button" class="icon-button" aria-label="Refresh dashboard" [class.spinning]="refreshing" (click)="loadDashboard()">↻</button>
+        <button type="button" class="icon-button" aria-label="Notifications" (click)="notificationsOpen = !notificationsOpen">
           ♧
           <span class="notification-dot"></span>
         </button>
-        <div class="avatar" aria-label="User profile">AQ</div>
+        <button class="avatar" type="button" aria-label="User profile" (click)="profileOpen = !profileOpen">{{ initials }}</button>
+        <div class="notification-menu" *ngIf="notificationsOpen">
+          <header><b>Quality alerts</b><a routerLink="/alerts">View all</a></header>
+          <p *ngFor="let issue of topIssues"><i></i><span><b>{{ issue._id }}</b><small>{{ issue.count }} signals detected</small></span></p>
+          <p *ngIf="!topIssues.length"><span>No active quality alerts.</span></p>
+        </div>
+        <div class="profile-menu" *ngIf="profileOpen">
+          <header><span>{{ initials }}</span><div><b>{{ user?.company || 'Agentic QA workspace' }}</b><small>{{ user?.email }}</small></div></header>
+          <a routerLink="/settings/profile">Profile settings</a>
+          <a routerLink="/pricing">Plan and billing</a>
+          <button type="button" (click)="logout()">Log out</button>
+        </div>
       </div>
     </header>
 
     <main class="dashboard-content">
       <div class="dashboard-inner">
-        <h1>Dashboard</h1>
+        <header class="welcome">
+          <div><p>Quality operations workspace</p><h1>Welcome back, {{ user?.company || 'Agentic QA' }}</h1><span>Monitor production quality, investigate failures, and keep your AI agents reliable.</span></div>
+          <div><div class="sync-status"><i [class.syncing]="refreshing"></i>{{ refreshing ? 'Syncing live data...' : lastSyncedAt ? ('Live data synced ' + (lastSyncedAt | date:'mediumTime')) : 'Connecting to live data...' }}</div><div class="quick-actions"><a routerLink="/batches/new">+ New batch</a><a routerLink="/research/new">New research</a><a routerLink="/analysis/live">Live analysis</a></div></div>
+        </header>
+        <div class="error-banner" *ngIf="error">{{ error }} <button (click)="loadDashboard()">Retry</button></div>
 
         <section class="kpi-grid" aria-label="Dashboard metrics">
           <article class="metric-card">
@@ -105,6 +153,18 @@
           </article>
         </section>
 
+        <section class="operations-grid">
+          <article class="plan-panel panel">
+            <header><div><span>Current plan</span><strong>{{ subscription?.plan?.name || stats?.plan || 'Free' }}</strong></div><a routerLink="/pricing">Manage plan →</a></header>
+            <div class="usage-line"><p><span>Batch files this month</span><b>{{ subscription?.usage?.filesUsed || 0 }} / {{ subscription?.usage?.fileLimit >= 1000000 ? 'Unlimited' : subscription?.usage?.fileLimit || 5 }}</b></p><i><b [style.width.%]="fileUsagePercent"></b></i></div>
+            <footer><span>All Agentic QA features are enabled.</span><a routerLink="/batches/new">Upload batch</a></footer>
+          </article>
+          <article class="issues-panel panel">
+            <header><div><span>Top quality risks</span><strong>{{ topIssues.length }} active patterns</strong></div><a routerLink="/analysis/failures">Investigate →</a></header>
+            <p *ngFor="let issue of topIssues; let i = index"><i [class.high]="i === 0"></i><span><b>{{ issue._id }}</b><small>{{ issue.count }} conversations · avg {{ issue.avgScore | number:'1.0-0' }}</small></span><em>{{ issue.avgScore | number:'1.0-0' }}</em></p>
+          </article>
+        </section>
+
         <section class="charts-grid">
           <article class="panel trend-panel">
             <h2>Score Trend — Last 30 Days</h2>
@@ -123,14 +183,13 @@
                 <text class="axis-label" x="0" y="52">100</text>
                 <text class="axis-label" x="8" y="120">75</text>
                 <text class="axis-label" x="8" y="188">50</text>
-                <path class="trend-area" d="M 28 210 C 88 130, 132 142, 176 152 C 240 166, 286 102, 344 70 C 404 38, 458 88, 514 92 C 574 98, 608 78, 628 48 L 628 248 L 28 248 Z"></path>
-                <path class="trend-line" d="M 28 210 C 88 130, 132 142, 176 152 C 240 166, 286 102, 344 70 C 404 38, 458 88, 514 92 C 574 98, 608 78, 628 48"></path>
+                <path class="trend-area" [attr.d]="trendAreaPath"></path>
+                <path class="trend-line" [attr.d]="trendLinePath"></path>
               </svg>
               <div class="chart-dates">
-                <span>Oct 1</span>
-                <span>Oct 15</span>
-                <span>Oct 30</span>
+                <span *ngFor="let label of trendLabels">{{ label }}</span>
               </div>
+              <p class="empty-trend" *ngIf="!trendData.length">Complete a batch evaluation to populate the live score trend.</p>
             </div>
           </article>
 
@@ -166,7 +225,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let batch of displayBatches">
+                <tr *ngFor="let batch of displayBatches" (click)="openBatch(batch)">
                   <td class="batch-name">{{ batch.name }}</td>
                   <td class="mono">{{ batch.createdAt | date: 'yyyy-MM-dd' }}</td>
                   <td class="mono">{{ batch.conversationCount | number }}</td>
@@ -183,6 +242,7 @@
                     </span>
                   </td>
                 </tr>
+                <tr *ngIf="!displayBatches.length"><td colspan="6" class="empty-table">No batch data yet. Upload a batch to begin live monitoring.</td></tr>
               </tbody>
             </table>
           </div>

@@ -1,56 +1,116 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User
-} from 'firebase/auth';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { FirebaseApp, getApps, initializeApp } from 'firebase/app';
+import { Auth, GoogleAuthProvider, getAuth, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+
+export interface AgentQaUser {
+  id: string;
+  email: string;
+  company: string;
+  plan: string;
+  evalUsed: number;
+  evalLimit: number;
+  batchUploadsUsed: number;
+  batchUploadLimit: number;
+  subscriptionStatus: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private app = initializeApp(environment.firebase);
-  private auth = getAuth(this.app);
-  private userSubject = new BehaviorSubject<User | null>(null);
+  private readonly tokenKey = 'agentqa_token';
+  private readonly userKey = 'agentqa_user';
+  private userSubject = new BehaviorSubject<AgentQaUser | null>(this.readUser());
+  private readySubject = new BehaviorSubject<boolean>(true);
   user$ = this.userSubject.asObservable();
-  private readySubject = new BehaviorSubject<boolean>(false);
   ready$ = this.readySubject.asObservable();
+  private firebaseApp: FirebaseApp | null = null;
+  private firebaseAuth: Auth | null = null;
 
-  constructor() {
-    onAuthStateChanged(this.auth, user => {
-      this.userSubject.next(user);
-      this.readySubject.next(true);
-    });
-  }
+  constructor(private http: HttpClient) {}
 
   get isLoggedIn(): boolean {
-    return !!this.userSubject.value;
+    return !!this.getStoredToken();
   }
 
   async signIn(email: string, password: string) {
-    const credential = await signInWithEmailAndPassword(this.auth, email, password);
-    this.userSubject.next(credential.user);
-    return credential.user;
+    const response: any = await firstValueFrom(
+      this.http.post(`${environment.apiBaseUrl}/api/auth/login`, { email, password })
+    );
+    this.storeSession(response.token, response.user);
+    return response.user;
+  }
+
+  async signUp(email: string, password: string, company = '') {
+    const response: any = await firstValueFrom(
+      this.http.post(`${environment.apiBaseUrl}/api/auth/signup`, { email, password, company })
+    );
+    this.storeSession(response.token, response.user);
+    return response.user;
+  }
+
+  async signInWithGoogle() {
+    const auth = this.getFirebaseAuth();
+    const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+    const firebaseToken = await credential.user.getIdToken();
+    const response: any = await firstValueFrom(
+      this.http.post(
+        `${environment.apiBaseUrl}/api/auth/firebase-session`,
+        {},
+        { headers: { Authorization: `Bearer ${firebaseToken}` } }
+      )
+    );
+    this.storeSession(response.token, response.user);
+    return response.user;
   }
 
   async signOut() {
-    await firebaseSignOut(this.auth);
+    if (this.firebaseAuth?.currentUser) {
+      await firebaseSignOut(this.firebaseAuth);
+    }
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
   }
 
   async getIdToken(): Promise<string | null> {
-    const user = this.auth.currentUser;
-    if (!user) {
-      return null;
-    }
-    return await user.getIdToken();
+    return this.getStoredToken();
   }
 
   async getAuthHeaders(): Promise<{ Authorization: string }> {
-    const token = await this.getIdToken();
-    return { Authorization: `Bearer ${token}` };
+    return { Authorization: `Bearer ${this.getStoredToken() ?? ''}` };
+  }
+
+  private storeSession(token: string, user: AgentQaUser) {
+    localStorage.setItem(this.tokenKey, token);
+    localStorage.setItem(this.userKey, JSON.stringify(user));
+    this.userSubject.next(user);
+  }
+
+  private getStoredToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private readUser(): AgentQaUser | null {
+    try {
+      const value = localStorage.getItem(this.userKey);
+      return value ? JSON.parse(value) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private getFirebaseAuth(): Auth {
+    if (environment.firebase.apiKey.startsWith('YOUR_')) {
+      throw new Error('Google login requires Firebase web credentials in environment.ts.');
+    }
+
+    if (!this.firebaseApp) {
+      this.firebaseApp = getApps()[0] ?? initializeApp(environment.firebase);
+      this.firebaseAuth = getAuth(this.firebaseApp);
+    }
+
+    return this.firebaseAuth!;
   }
 }

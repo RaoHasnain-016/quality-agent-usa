@@ -1,6 +1,7 @@
 const { getGemini } = require('../config/gemini')
 const Conversation = require('../models/Conversation')
 const Batch = require('../models/Batch')
+const { evaluateLocally } = require('./localEvalService')
 
 const WEIGHTS = {
   accuracy_score: 0.3,
@@ -84,6 +85,13 @@ function normalizeEvaluation (payload) {
 }
 
 async function evaluateOne (rawText, companyPolicy = '') {
+  const provider = String(process.env.AI_PROVIDER || 'auto').toLowerCase()
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.includes('YOUR_KEY_HERE'))
+
+  if (provider === 'local' || !hasGeminiKey) {
+    return normalizeEvaluation(evaluateLocally(rawText, companyPolicy))
+  }
+
   const gemini = getGemini()
   const prompt = EVAL_PROMPT
     .replace('{POLICY}', companyPolicy?.trim() || 'No specific policy provided. Use general customer service best practices.')

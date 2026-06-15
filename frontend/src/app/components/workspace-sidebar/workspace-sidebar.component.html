@@ -1,0 +1,21 @@
+<aside class="workspace-sidebar">
+  <a class="brand" routerLink="/dashboard"><span>AQ</span><div><b>AgentQA</b><small>Quality Intelligence</small></div></a>
+  <nav>
+    <em>Monitor</em>
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><i>D</i><span>Dashboard</span></a>
+    <a routerLink="/batches" routerLinkActive="active"><i>B</i><span>Batches</span></a>
+    <a routerLink="/conversations" routerLinkActive="active"><i>C</i><span>Conversations</span></a>
+    <a routerLink="/alerts" routerLinkActive="active"><i>!</i><span>Alerts</span></a>
+    <em>Intelligence</em>
+    <a routerLink="/research" routerLinkActive="active"><i>R</i><span>Research</span></a>
+    <a routerLink="/analysis" routerLinkActive="active"><i>A</i><span>Analysis</span></a>
+    <a routerLink="/reports" routerLinkActive="active"><i>P</i><span>Reports</span></a>
+    <em>Workspace</em>
+    <a routerLink="/settings/workspace" routerLinkActive="active"><i>S</i><span>Settings</span></a>
+    <a routerLink="/usage" routerLinkActive="active"><i>U</i><span>Usage</span></a>
+    <a routerLink="/pricing" routerLinkActive="active"><i>$</i><span>Plans &amp; Billing</span></a>
+    <a routerLink="/audit-log" routerLinkActive="active"><i>L</i><span>Audit Log</span></a>
+    <a routerLink="/help" routerLinkActive="active"><i>?</i><span>Help Center</span></a>
+  </nav>
+  <button type="button" class="user-card" (click)="logout()"><i>{{ initials }}</i><span><b>{{ user?.company || 'AgentQA workspace' }}</b><small>{{ planName }} plan - Log out</small></span></button>
+</aside>
